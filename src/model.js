@@ -2,24 +2,29 @@ var DataBind = DataBind || {};
 
 DataBind.Model = function() {
     var attrs = {};
-    var myCallback;
+    var onValueChanged;
     var attr = function(name, value) {
         if (value) {
             attrs[name] = value;
-            console.log(typeof myCallback);
-            if (typeof myCallback === "function")
-                myCallback(name);
+            fireOnValueChanged(name);
         } else {
             return attrs[name];
         }
     };
 
-    var onValueChange = function(callback) {
-        myCallback = callback;
+    var fireOnValueChanged = function(name) {
+        if (onValueChanged) {
+            onValueChanged(name);
+        }
+    };
+
+    var setOnValueChanged = function(callback) {
+        onValueChanged = callback;
     };
 
     return {
         attr: attr,
-        onValueChange: onValueChange
+        attrs: attrs,
+        setOnValueChanged: setOnValueChanged
     };
 };
