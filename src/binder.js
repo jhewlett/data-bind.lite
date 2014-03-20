@@ -1,13 +1,15 @@
 var DataBind = DataBind || {};
 
 DataBind.Binder = function(model) {
+    var scopeElement = document.querySelector('[data-scope=' + model.scope + ']');
+
     model.setOnValueChanged(function(name) {
-        var bindings = document.querySelectorAll('[data-bind=' + name + ']');
+        var bindings = scopeElement.querySelectorAll('[data-bind=' + name + ']');
         updateDom(bindings);
     });
 
     var bind = function() {
-        var bindings = document.querySelectorAll('[data-bind]');
+        var bindings = scopeElement.querySelectorAll('[data-bind]');
         updateDom(bindings);
     };
 
@@ -18,7 +20,7 @@ DataBind.Binder = function(model) {
                 bindings[i].innerHTML = model.attr(name);
             }
         }
-    }
+    };
 
     return {
         bind: bind

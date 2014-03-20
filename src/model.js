@@ -1,6 +1,6 @@
 var DataBind = DataBind || {};
 
-DataBind.Model = function() {
+DataBind.Model = function(scope) {
     var attrs = {};
     var onValueChanged;
     var attr = function(name, value) {
@@ -24,7 +24,7 @@ DataBind.Model = function() {
 
     return {
         attr: attr,
-        attrs: attrs,
+        scope: scope,
         setOnValueChanged: setOnValueChanged
     };
 };

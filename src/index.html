@@ -4,8 +4,14 @@
     <title></title>
 </head>
 <body>
-    <span data-bind="firstName"></span>
-    <span data-bind="lastName"></span>
+    <div data-scope="one">
+        <span data-bind="firstName"></span>
+        <span data-bind="lastName"></span>
+    </div>
+    <div data-scope="two">
+        <span data-bind="firstName"></span>
+        <span data-bind="lastName"></span>
+    </div>
 <script src="binder.js"></script>
 <script src="model.js"></script>
 <script src="controller.js"></script>
