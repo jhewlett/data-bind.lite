@@ -15,9 +15,21 @@ DataBind.Binder = function(model) {
 
     var updateDom = function(bindings) {
         for (var i = 0; i < bindings.length; i++) {
-            var name = bindings[i].getAttribute('data-bind');
-            if (model.attr(name)) {
-                bindings[i].innerHTML = model.attr(name);
+            bindValue(bindings[i]);
+        }
+    };
+
+    var bindValue = function(binding) {
+        var name = binding.getAttribute('data-bind');
+        if (model.attr(name)) {
+            if (binding.value !== undefined) {
+                binding.value = model.attr(name);
+                binding.addEventListener('input', function() {
+                    model.attr(name, binding.value);
+                    console.log(model.attr(name));
+                });
+            } else {
+                binding.innerHTML = model.attr(name);
             }
         }
     };
