@@ -1,19 +1,19 @@
 var DataBind = DataBind || {};
 
 DataBind.Model = function(scope) {
-    var attrs = {};
+    var map = {};
     var onValueChanged;
     var attr = function(name, value) {
         if (value !== undefined) {
-            attrs[name] = value;
+            map[name] = value;
             fireOnValueChanged(name);
         } else {
-            return attrs[name];
+            return map[name];
         }
     };
 
     var hasAttr = function(name) {
-        return attrs[name] !== undefined;
+        return map[name] !== undefined;
     };
 
     var fireOnValueChanged = function(name) {
