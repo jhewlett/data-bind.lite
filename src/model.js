@@ -1,19 +1,25 @@
 var DataBind = DataBind || {};
 
 DataBind.Model = function(scope) {
-    var map = {};
+    var attrs = {};
     var onValueChanged;
     var attr = function(name, value) {
         if (value !== undefined) {
-            map[name] = value;
+            attrs[name] = value;
             fireOnValueChanged(name);
+        } else if (typeof attrs[name] === "function") {
+            return attrs[name].call(this);
         } else {
-            return map[name];
+            return attrs[name];
         }
     };
 
+    var computed = function(name, dependencies, func) {
+        attrs[name] = func;
+    };
+
     var hasAttr = function(name) {
-        return map[name] !== undefined;
+        return attrs[name] !== undefined;
     };
 
     var fireOnValueChanged = function(name) {
@@ -28,6 +34,7 @@ DataBind.Model = function(scope) {
 
     return {
         attr: attr,
+        computed: computed,
         hasAttr: hasAttr,
         scope: scope,
         setOnValueChanged: setOnValueChanged

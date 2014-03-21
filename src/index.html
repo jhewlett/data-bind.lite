@@ -5,17 +5,19 @@
 </head>
 <body>
     <div data-scope="one">
-        <!--<span data-bind="firstName"></span>-->
+        <input type="text" data-bind="firstName">
+        <input type="text" data-bind="lastName">  <br>
+        <span data-bind="fullName"></span>
         <!--<input type="checkbox" data-bind="checked" >-->
         <!--<span data-bind="checked"></span>-->
 
         <!--<input type="radio" name="sex" data-bind="sex" value="male">Male-->
         <!--<input type="radio" name="sex" data-bind="sex" value="female">Female <br>-->
-        <select data-bind="sex">
-            <option value="male"> Male</option>
-            <option value="female">Female</option>
-        </select>
-        Sex: <span data-bind="sex"></span>
+        <!--<select data-bind="sex">-->
+            <!--<option value="male"> Male</option>-->
+            <!--<option value="female">Female</option>-->
+        <!--</select>-->
+        <!--Sex: <span data-bind="sex"></span>-->
     </div>
 <script src="binder.js"></script>
 <script src="model.js"></script>
