@@ -25,14 +25,22 @@ DataBind.Model = function(scope) {
         }
     };
 
-    var computed = function(name, dependencies, func) {
-        //parse func and look for this.attr('{0}') ?
-        for(var i = 0; i < dependencies.length; i++) {
-            dependsOn[dependencies[i]] = dependsOn[dependencies[i]] || [];
-            dependsOn[dependencies[i]].push(name);
+    var computed = function(name, func) {
+        var regEx = new RegExp(/this\.attr\('(\w+)'\)/g);
+
+        var match = regEx.exec(func.toString());
+        while (match != null) {
+            addDependency(name, match[1]);
+            match = regEx.exec(func.toString());
         }
+
         attrs[name] = func;
     };
+
+    var addDependency = function(name, dependency) {
+        dependsOn[dependency] = dependsOn[dependency] || [];
+        dependsOn[dependency].push(name);
+    }
 
     var hasAttr = function(name) {
         return attrs.hasOwnProperty(name);
