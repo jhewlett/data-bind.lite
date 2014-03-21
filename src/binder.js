@@ -35,6 +35,12 @@ DataBind.Binder = function(model) {
                     model.attr(name, element.value);
                 };
             }
+            else if (element.tagName.toLowerCase() === 'select') {
+                element.value = model.attr(name);
+                element.onclick = function() {
+                    model.attr(name, element.value);
+                };
+            }
             else if (element.value !== undefined) {
                 element.value = model.attr(name);
                 element.oninput = function() {
