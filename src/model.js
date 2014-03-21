@@ -3,7 +3,8 @@ var DataBind = DataBind || {};
 DataBind.Model = function(scope) {
     var attrs = {};
     var dependsOn = {};
-    var valueChanged;
+    var valueChanged = function(name) { };
+
     var attr = function(name, value) {
         if (value !== undefined) {
             attrs[name] = value;
@@ -16,7 +17,7 @@ DataBind.Model = function(scope) {
     };
 
     var fireValueChangedForAllDependencies = function(name) {
-        fireOnValueChanged(name);
+        valueChanged(name);
         if (dependsOn.hasOwnProperty(name)) {
             for(var i = 0; i < dependsOn[name].length; i++) {
                 fireValueChangedForAllDependencies(dependsOn[name][i]);
@@ -25,6 +26,7 @@ DataBind.Model = function(scope) {
     };
 
     var computed = function(name, dependencies, func) {
+        //parse func and look for this.attr('{0}') ?
         for(var i = 0; i < dependencies.length; i++) {
             dependsOn[dependencies[i]] = dependsOn[dependencies[i]] || [];
             dependsOn[dependencies[i]].push(name);
@@ -34,12 +36,6 @@ DataBind.Model = function(scope) {
 
     var hasAttr = function(name) {
         return attrs.hasOwnProperty(name);
-    };
-
-    var fireOnValueChanged = function(name) {
-        if (valueChanged) {
-            valueChanged(name);
-        }
     };
 
     var setValueChanged = function(callback) {
