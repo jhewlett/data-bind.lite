@@ -4,12 +4,16 @@ DataBind.Model = function(scope) {
     var attrs = {};
     var onValueChanged;
     var attr = function(name, value) {
-        if (value) {
+        if (value !== undefined) {
             attrs[name] = value;
             fireOnValueChanged(name);
         } else {
             return attrs[name];
         }
+    };
+
+    var hasAttr = function(name) {
+        return attrs[name] !== undefined;
     };
 
     var fireOnValueChanged = function(name) {
@@ -24,6 +28,7 @@ DataBind.Model = function(scope) {
 
     return {
         attr: attr,
+        hasAttr: hasAttr,
         scope: scope,
         setOnValueChanged: setOnValueChanged
     };

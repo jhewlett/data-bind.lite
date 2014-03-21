@@ -4,32 +4,44 @@ DataBind.Binder = function(model) {
     var scopeElement = document.querySelector('[data-scope=' + model.scope + ']');
 
     model.setOnValueChanged(function(name) {
-        var bindings = scopeElement.querySelectorAll('[data-bind=' + name + ']');
-        updateDom(bindings);
+        var elements = scopeElement.querySelectorAll('[data-bind=' + name + ']');
+
+        updateDom(elements);
     });
 
     var bind = function() {
-        var bindings = scopeElement.querySelectorAll('[data-bind]');
-        updateDom(bindings);
+        var elements = scopeElement.querySelectorAll('[data-bind]');
+        updateDom(elements);
     };
 
-    var updateDom = function(bindings) {
-        for (var i = 0; i < bindings.length; i++) {
-            bindValue(bindings[i]);
+    var updateDom = function(elements) {
+        for (var i = 0; i < elements.length; i++) {
+            bindValue(elements[i]);
         }
     };
 
-    var bindValue = function(binding) {
-        var name = binding.getAttribute('data-bind');
-        if (model.attr(name)) {
-            if (binding.value !== undefined) {
-                binding.value = model.attr(name);
-                binding.addEventListener('input', function() {
-                    model.attr(name, binding.value);
-                    console.log(model.attr(name));
-                });
+    var bindValue = function(element) {
+        var name = element.getAttribute('data-bind');
+        if (model.hasAttr(name)) {
+            if (element.type === 'checkbox') {
+                element.checked = model.attr(name);
+                element.onclick = function() {
+                    model.attr(name, element.checked);
+                };
+            }
+            else if (element.type === 'radio') {
+                element.checked = model.attr(name) === element.value;
+                element.onclick = function() {
+                    model.attr(name, element.value);
+                };
+            }
+            else if (element.value !== undefined) {
+                element.value = model.attr(name);
+                element.oninput = function() {
+                    model.attr(name, element.value);
+                };
             } else {
-                binding.innerHTML = model.attr(name);
+                element.innerHTML = model.attr(name);
             }
         }
     };

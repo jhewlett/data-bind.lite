@@ -5,14 +5,16 @@
 </head>
 <body>
     <div data-scope="one">
-        <input type="text" data-bind="firstName">
-        <span data-bind="lastName"></span>
-        <input type="checkbox" data-bind="checked" >
+        <!--<textarea data-bind="firstName"></textarea>-->
+        <!--<span data-bind="firstName"></span>-->
+        <!--<input type="checkbox" data-bind="checked" >-->
+        <!--<span data-bind="checked"></span>-->
+
+        <input type="radio" name="sex" data-bind="sex" value="male">Male
+        <input type="radio" name="sex" data-bind="sex" value="female">Female <br>
+        Sex: <span data-bind="sex"></span>
     </div>
-    <div data-scope="two">
-        <span data-bind="firstName"></span>
-        <span data-bind="lastName"></span>
-    </div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
 <script src="binder.js"></script>
 <script src="model.js"></script>
 <script src="controller.js"></script>
