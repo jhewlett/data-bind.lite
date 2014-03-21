@@ -3,7 +3,7 @@ var DataBind = DataBind || {};
 DataBind.Binder = function(model) {
     var scopeElement = document.querySelector('[data-scope=' + model.scope + ']');
 
-    model.setOnValueChanged(function(name) {
+    model.setValueChanged(function(name) {
         var elements = scopeElement.querySelectorAll('[data-bind=' + name + ']');
 
         updateDom(elements);

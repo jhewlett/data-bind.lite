@@ -3,20 +3,24 @@ var DataBind = DataBind || {};
 DataBind.Model = function(scope) {
     var attrs = {};
     var dependsOn = {};
-    var onValueChanged;
+    var valueChanged;
     var attr = function(name, value) {
         if (value !== undefined) {
             attrs[name] = value;
-            fireOnValueChanged(name);
-            if (dependsOn.hasOwnProperty(name)) {
-                for(var i = 0; i < dependsOn[name].length; i++) {
-                    fireOnValueChanged(dependsOn[name][i]);
-                }
-            }
+            fireValueChangedForAllDependencies(name);
         } else if (typeof attrs[name] === "function") {
             return attrs[name].call(this);
         } else {
             return attrs[name];
+        }
+    };
+
+    var fireValueChangedForAllDependencies = function(name) {
+        fireOnValueChanged(name);
+        if (dependsOn.hasOwnProperty(name)) {
+            for(var i = 0; i < dependsOn[name].length; i++) {
+                fireValueChangedForAllDependencies(dependsOn[name][i]);
+            }
         }
     };
 
@@ -33,13 +37,13 @@ DataBind.Model = function(scope) {
     };
 
     var fireOnValueChanged = function(name) {
-        if (onValueChanged) {
-            onValueChanged(name);
+        if (valueChanged) {
+            valueChanged(name);
         }
     };
 
-    var setOnValueChanged = function(callback) {
-        onValueChanged = callback;
+    var setValueChanged = function(callback) {
+        valueChanged = callback;
     };
 
     return {
@@ -47,6 +51,6 @@ DataBind.Model = function(scope) {
         computed: computed,
         hasAttr: hasAttr,
         scope: scope,
-        setOnValueChanged: setOnValueChanged
+        setValueChanged: setValueChanged
     };
 };

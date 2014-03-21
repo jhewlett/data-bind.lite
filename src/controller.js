@@ -7,7 +7,7 @@ model.attr('sex', 'male');
 model.computed('fullName', ['firstName', 'lastName'], function() {
     return this.attr('firstName') + ' ' + this.attr('lastName');
 });
-model.computed('sentence', ['firstName', 'lastName'], function() {
+model.computed('sentence', ['fullName'], function() {
     return this.attr('fullName') + ' went to the store';
 });
 
