@@ -9,7 +9,9 @@ DataBind.Model = function(scope) {
             attrs[name] = value;
             fireOnValueChanged(name);
             if (dependsOn.hasOwnProperty(name)) {
-                fireOnValueChanged(dependsOn[name]);
+                for(var i = 0; i < dependsOn[name].length; i++) {
+                    fireOnValueChanged(dependsOn[name][i]);
+                }
             }
         } else if (typeof attrs[name] === "function") {
             return attrs[name].call(this);
@@ -20,7 +22,8 @@ DataBind.Model = function(scope) {
 
     var computed = function(name, dependencies, func) {
         for(var i = 0; i < dependencies.length; i++) {
-            dependsOn[dependencies[i]] = name;
+            dependsOn[dependencies[i]] = dependsOn[dependencies[i]] || [];
+            dependsOn[dependencies[i]].push(name);
         }
         attrs[name] = func;
     };
