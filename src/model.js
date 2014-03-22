@@ -29,7 +29,7 @@ DataBind.Model = function(scope) {
     };
 
     var computed = function(name, func) {
-        var regEx = /this\.get\('(\w+)'\)/g;
+        var regEx = /this\.get\(['"](\w+)['"]\)/g;
 
         var match = regEx.exec(func.toString());
         while (match != null) {

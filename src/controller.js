@@ -8,7 +8,7 @@ model.computed('fullName', function() {
     return this.get('firstName') + ' ' + this.get('lastName');
 });
 model.computed('sentence', function() {
-    return this.get('fullName') + ' went to the store';
+    return this.get("fullName") + ' went to the store';
 });
 model.attr('array', [1, 2, 3]);
 model.pop = function() {
