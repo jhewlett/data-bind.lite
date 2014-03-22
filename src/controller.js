@@ -5,15 +5,15 @@ model.attr('lastName', 'Hewlett');
 model.attr('checked', true);
 model.attr('sex', 'male');
 model.computed('fullName', function() {
-    return this.attr('firstName') + ' ' + this.attr('lastName');
+    return this.get('firstName') + ' ' + this.get('lastName');
 });
 model.computed('sentence', function() {
-    return this.attr('fullName') + ' went to the store';
+    return this.get('fullName') + ' went to the store';
 });
 model.attr('array', [1, 2, 3]);
 model.pop = function() {
-    this.attr('array').pop();
-}
+    this.get('array').pop();
+};
 
 var binder = new DataBind.Binder(model);
 binder.bind();

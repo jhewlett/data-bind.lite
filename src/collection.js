@@ -14,8 +14,7 @@ DataBind.Collection = function(name, arr, valueChangedCallback) {
     return {
         push: push,
         pop: pop,
-        arr: arr,
-        length: arr.length,
-        toString: arr.toString
+        value: arr,
+        length: arr.length
     };
 }

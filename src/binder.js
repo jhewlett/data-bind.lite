@@ -37,25 +37,25 @@ DataBind.Binder = function(model) {
         var name = element.getAttribute('data-bind');
         if (model.hasAttr(name)) {
             if (element.type === 'checkbox') {
-                element.checked = model.attr(name);
+                element.checked = model.get(name);
                 element.onclick = function() {
                     model.attr(name, element.checked);
                 };
             }
             else if (element.type === 'radio') {
-                element.checked = model.attr(name) === element.value;
+                element.checked = model.get(name) === element.value;
                 element.onclick = function() {
                     model.attr(name, element.value);
                 };
             }
             else if (element.tagName.toLowerCase() === 'select') {
-                element.value = model.attr(name);
+                element.value = model.get(name);
                 element.onchange = function() {
                     model.attr(name, element.value);
                 };
             }
             else if (element.value !== undefined) {
-                element.value = model.attr(name);
+                element.value = model.get(name);
                 element.oninput = function() {
                     model.attr(name, element.value);
                 };
@@ -66,11 +66,11 @@ DataBind.Binder = function(model) {
     };
 
     var getValue = function(name) {
-        if (model.attr(name).arr) {
-            return model.attr(name).arr;
+        if (model.hasAttr(name) && model.get(name).value) {
+            return model.get(name).value;
         }
 
-        return model.attr(name);
+        return model.get(name);
     };
 
     return {

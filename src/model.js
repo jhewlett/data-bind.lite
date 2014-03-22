@@ -3,22 +3,15 @@ var DataBind = DataBind || {};
 DataBind.Model = function(scope) {
     var attrs = {};
     var dependsOn = {};
-    //var collections = {};
     var valueChanged = function(name) { };
 
     var attr = function(name, value) {
-        if (value !== undefined) {
-            if (Array.isArray(value)) {
-                addCollection(name, value);
-            } else {
-                attrs[name] = value;
-            }
-            fireValueChangedForAllDependencies(name);
-        } else if (typeof attrs[name] === "function") {
-            return attrs[name].call(this);
+        if (Array.isArray(value)) {
+            addCollection(name, value);
         } else {
-            return attrs[name];
+            attrs[name] = value;
         }
+        fireValueChangedForAllDependencies(name);
     };
 
     var fireValueChangedForAllDependencies = function(name) {
@@ -36,7 +29,7 @@ DataBind.Model = function(scope) {
     };
 
     var computed = function(name, func) {
-        var regEx = /this\.attr\('(\w+)'\)/g;
+        var regEx = /this\.get\('(\w+)'\)/g;
 
         var match = regEx.exec(func.toString());
         while (match != null) {
@@ -60,8 +53,17 @@ DataBind.Model = function(scope) {
         valueChanged = callback;
     };
 
+    var get = function(name) {
+        if (typeof attrs[name] === "function") {
+            return attrs[name].call(this);
+        }
+
+        return attrs[name];
+    };
+
     return {
         attr: attr,
+        get: get,
         computed: computed,
         hasAttr: hasAttr,
         scope: scope,
