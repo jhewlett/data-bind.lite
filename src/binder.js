@@ -12,6 +12,19 @@ DataBind.Binder = function(model) {
     var bind = function() {
         var elements = scopeElement.querySelectorAll('[data-bind]');
         updateDom(elements);
+
+        var clickElements = scopeElement.querySelectorAll('[data-click]');
+        for (var i = 0; i < clickElements.length; i++) {
+            handleClick(clickElements[i]);
+        }
+    };
+
+    var handleClick = function(element) {
+        var expression = element.getAttribute('data-click');
+
+        element.onclick = function() {
+            eval('model.' + expression);
+        }
     };
 
     var updateDom = function(elements) {
@@ -47,9 +60,17 @@ DataBind.Binder = function(model) {
                     model.attr(name, element.value);
                 };
             } else {
-                element.innerHTML = model.attr(name);
+                element.innerHTML = getValue(name);
             }
         }
+    };
+
+    var getValue = function(name) {
+        if (model.attr(name).arr) {
+            return model.attr(name).arr;
+        }
+
+        return model.attr(name);
     };
 
     return {

@@ -10,6 +10,10 @@ model.computed('fullName', function() {
 model.computed('sentence', function() {
     return this.attr('fullName') + ' went to the store';
 });
+model.attr('array', [1, 2, 3]);
+model.pop = function() {
+    this.attr('array').pop();
+}
 
 var binder = new DataBind.Binder(model);
 binder.bind();
