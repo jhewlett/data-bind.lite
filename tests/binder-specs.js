@@ -11,6 +11,7 @@ describe('binder', function() {
         element.getAttribute.withArgs('data-bind').returns('prop');
         scopeElement.querySelectorAll.withArgs('[data-bind]').returns([element]);
         scopeElement.querySelectorAll.withArgs('[data-click]').returns([]);
+        scopeElement.querySelectorAll.withArgs('[data-class]').returns([]);
         documentStub.querySelector.withArgs('[data-scope=scope]').returns(scopeElement);
         binder = new DataBind.Binder(model, documentStub);
     });
