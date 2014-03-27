@@ -14,6 +14,9 @@ model.attr('array', [1, 2, 3]);
 model.pop = function() {
     this.get('array').pop();
 };
+model.computed('getClass', function() {
+    return this.get('firstName') === 'joe' ? 'hidden' : '';
+});
 
 var binder = new DataBind.Binder(model);
 binder.bind();

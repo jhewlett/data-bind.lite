@@ -1,17 +1,42 @@
 var DataBind = DataBind || {};
 
-DataBind.Binder = function(model) {
-    var scopeElement = document.querySelector('[data-scope=' + model.scope + ']');
+DataBind.Binder = function(model, document) {
+    var doc = document || window.document;
+    var scopeElement = doc.querySelector('[data-scope=' + model.scope + ']');
+    var currentValue = {};
 
     model.setValueChanged(function(name) {
-        var elements = scopeElement.querySelectorAll('[data-bind=' + name + ']');
+        var valueElements = scopeElement.querySelectorAll('[data-bind=' + name + ']');
+        bindValues(valueElements);
 
-        updateDom(elements);
+        var classElements = scopeElement.querySelectorAll('[data-class=' + name + ']');
+        bindClasses(classElements);
     });
 
+    var bindClasses = function(elements) {
+        for (var i = 0; i < elements.length; i++) {
+            var attrValue = elements[i].getAttribute('data-class');
+
+            var oldValue = currentValue[attrValue];
+            if (oldValue) {
+                elements[i].classList.remove(oldValue);
+            }
+
+            var newClass = model.get(attrValue);
+            currentValue[attrValue] = newClass;
+
+            if (newClass) {
+                elements[i].classList.add(newClass);
+            }
+        }
+    };
+
     var bind = function() {
-        var elements = scopeElement.querySelectorAll('[data-bind]');
-        updateDom(elements);
+        var valueElements = scopeElement.querySelectorAll('[data-bind]');
+        bindValues(valueElements);
+
+        var classElements = scopeElement.querySelectorAll('[data-class]');
+        bindClasses(classElements);
 
         var clickElements = scopeElement.querySelectorAll('[data-click]');
         for (var i = 0; i < clickElements.length; i++) {
@@ -27,7 +52,7 @@ DataBind.Binder = function(model) {
         }
     };
 
-    var updateDom = function(elements) {
+    var bindValues = function(elements) {
         for (var i = 0; i < elements.length; i++) {
             bindValue(elements[i]);
         }
@@ -66,11 +91,12 @@ DataBind.Binder = function(model) {
     };
 
     var getValue = function(name) {
-        if (model.hasAttr(name) && model.get(name).value) {
-            return model.get(name).value;
+        var attr = model.get(name);
+        if (attr.value) {
+            return attr.value;
         }
 
-        return model.get(name);
+        return attr;
     };
 
     return {
