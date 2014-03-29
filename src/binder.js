@@ -80,7 +80,9 @@ DataBind.Binder = function(model, document) {
                 };
             }
             else if (element.value !== undefined) {
-                element.value = model.get(name);
+                if (element.value !== model.get(name)) {
+                    element.value = model.get(name);
+                }
                 element.oninput = function() {
                     model.attr(name, element.value);
                 };
