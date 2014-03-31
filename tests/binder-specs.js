@@ -17,6 +17,38 @@ describe('binder', function() {
     });
 
     describe('bind', function() {
+        describe('classes', function() {
+            var classList;
+            beforeEach(function() {
+                classList = sinon.stub({add: function() {}, remove: function() {}});
+                element = sinon.stub({getAttribute: function() {}, classList: classList});
+                element.getAttribute.withArgs('data-class').returns('prop');
+
+                scopeElement.querySelectorAll.withArgs('[data-class]').returns([element]);
+            });
+
+            it('should add attribute value as a class', function() {
+                binder.bind();
+
+                expect(classList.add.calledWith('myValue')).toBeTruthy();
+            });
+
+            describe('when the value changes to a new value', function() {
+                beforeEach(function() {
+                    scopeElement.querySelectorAll.withArgs('[data-class=prop]').returns([element]);
+                    scopeElement.querySelectorAll.withArgs('[data-bind=prop]').returns([]);
+                });
+
+                it('should update the class', function() {
+                    binder.bind();
+                    model.attr('prop', 'newClass');
+
+                    expect(classList.remove.calledWith('myValue')).toBeTruthy();
+                    expect(classList.add.calledWith('newClass')).toBeTruthy();
+                });
+            });
+        });
+
         describe('templates', function() {
             var template;
 

@@ -21,17 +21,17 @@ DataBind.Binder = function(model, document) {
         for (var i = 0; i < elements.length; i++) {
             var regEx = /{{([^}]+)}}/g;
 
-            elements[i].innerHTML = templates[i].replace(regEx, fillInValue);
+            elements[i].innerHTML = templates[i].replace(regEx, fillValue);
         }
     };
 
-    function fillInValue(match, group1) {
+    var fillValue = function(match, group1) {
         var value = model.get(group1);
 
         return value !== undefined
             ? value
             : '';
-    }
+    };
 
     var bindClasses = function(elements) {
         for (var i = 0; i < elements.length; i++) {
