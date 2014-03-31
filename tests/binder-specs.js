@@ -41,6 +41,19 @@ describe('binder', function() {
             });
         });
 
+        describe('select', function() {
+            beforeEach(function() {
+                element = sinon.stub({getAttribute: function() {}, tagName: 'SELECT', checked: false});
+                element.getAttribute.withArgs('data-bind').returns('prop');
+                scopeElement.querySelectorAll.withArgs('[data-bind]').returns([element]);
+            });
+
+            it('should set value', function() {
+                binder.bind();
+                expect(element.value).toEqual('myValue');
+            });
+        });
+
         describe('radio', function() {
             beforeEach(function() {
                 element = sinon.stub({getAttribute: function() {}, type: 'radio', value: 'wrongValue', tagName: '', checked: false});
