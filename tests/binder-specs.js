@@ -10,6 +10,7 @@ describe('binder', function() {
         scopeElement = sinon.stub({querySelectorAll: function() {}});
         scopeElement.querySelectorAll.withArgs('[data-click]').returns([]);
         scopeElement.querySelectorAll.withArgs('[data-class]').returns([]);
+        scopeElement.querySelectorAll.withArgs('[data-template]').returns([]);
         documentStub.querySelector.withArgs('[data-scope=scope]').returns(scopeElement);
         binder = new DataBind.Binder(model, documentStub);
     });
@@ -43,7 +44,7 @@ describe('binder', function() {
 
         describe('select', function() {
             beforeEach(function() {
-                element = sinon.stub({getAttribute: function() {}, tagName: 'SELECT', checked: false});
+                element = sinon.stub({getAttribute: function() {}, tagName: 'SELECT'});
                 element.getAttribute.withArgs('data-bind').returns('prop');
                 scopeElement.querySelectorAll.withArgs('[data-bind]').returns([element]);
             });
