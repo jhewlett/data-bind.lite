@@ -14,6 +14,11 @@ DataBind.Model = function(scope) {
         fireValueChangedForAllDependencies(name);
     };
 
+    var addCollection = function(name, value) {
+        attrs[name] = new DataBind.Collection(name, value, fireValueChangedForAllDependencies);
+        fireValueChangedForAllDependencies(name);
+    };
+
     var fireValueChangedForAllDependencies = function(name) {
         valueChanged(name);
         if (dependsOn.hasOwnProperty(name)) {
@@ -21,11 +26,6 @@ DataBind.Model = function(scope) {
                 fireValueChangedForAllDependencies(dependsOn[name][i]);
             }
         }
-    };
-
-    var addCollection = function(name, value) {
-        attrs[name] = new DataBind.Collection(name, value, fireValueChangedForAllDependencies);
-        fireValueChangedForAllDependencies(name);
     };
 
     var computed = function(name, func) {

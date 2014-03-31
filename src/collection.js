@@ -11,10 +11,16 @@ DataBind.Collection = function(name, arr, valueChangedCallback) {
         valueChangedCallback(name);
     };
 
+    var set = function(index, value) {
+        arr[index] = value;
+        valueChangedCallback(name);
+    };
+
     return {
         push: push,
         pop: pop,
         value: arr,
+        set: set,
         length: arr.length
     };
-}
+};

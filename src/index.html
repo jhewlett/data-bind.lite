@@ -7,10 +7,11 @@
 <body>
     <div data-scope="one">
         <!--My Collection:-->
-        <!--<span data-bind="array"></span>  <br>-->
-        <!--<button data-click="pop()">Add Text</button>-->
+        <span data-bind="array"></span>  <br>
+        <button data-click="pop()">Add Text</button>
+        <p data-template>Hello {{firstName}} <span>{{lastName}} {{nonExistent}}</span></p>
         <input type="text" data-bind="firstName"> <br>
-         <input type="text" data-bind="lastName" data-class="getClass">  <br>
+        <input type="text" data-bind="lastName" data-class="getClass">  <br>
         <span data-bind="fullName"></span>  <br>
         <span data-bind="sentence"></span>
         <!--<input type="checkbox" data-bind="checked" >-->
@@ -19,7 +20,7 @@
         <!--<input type="radio" name="sex" data-bind="sex" value="male">Male-->
         <!--<input type="radio" name="sex" data-bind="sex" value="female">Female <br>-->
         <!--<select data-bind="sex">-->
-            <!--<option value="male"> Male</option>-->
+            <!--<option value="male">Male</option>-->
             <!--<option value="female">Female</option>-->
         <!--</select>-->
         <!--Sex: <span data-bind="sex"></span>-->

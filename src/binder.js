@@ -4,6 +4,7 @@ DataBind.Binder = function(model, document) {
     var doc = document || window.document;
     var scopeElement = doc.querySelector('[data-scope=' + model.scope + ']');
     var currentValue = {};
+    var templates = [];
 
     model.setValueChanged(function(name) {
         var valueElements = scopeElement.querySelectorAll('[data-bind=' + name + ']');
@@ -11,7 +12,26 @@ DataBind.Binder = function(model, document) {
 
         var classElements = scopeElement.querySelectorAll('[data-class=' + name + ']');
         bindClasses(classElements);
+
+        var templateElements = scopeElement.querySelectorAll('[data-template]');
+        bindTemplates(templateElements);
     });
+
+    var bindTemplates = function(elements) {
+        for (var i = 0; i < elements.length; i++) {
+            var regEx = /{{([^}]+)}}/g;
+
+            elements[i].innerHTML = templates[i].replace(regEx, fillInValue);
+        }
+    };
+
+    function fillInValue(match, group1) {
+        var value = model.get(group1);
+
+        return value !== undefined
+            ? value
+            : '';
+    }
 
     var bindClasses = function(elements) {
         for (var i = 0; i < elements.length; i++) {
@@ -38,9 +58,19 @@ DataBind.Binder = function(model, document) {
         var classElements = scopeElement.querySelectorAll('[data-class]');
         bindClasses(classElements);
 
+        var templateElements = scopeElement.querySelectorAll('[data-template]');
+        captureTemplates(templateElements);
+        bindTemplates(templateElements);
+
         var clickElements = scopeElement.querySelectorAll('[data-click]');
         for (var i = 0; i < clickElements.length; i++) {
             handleClick(clickElements[i]);
+        }
+    };
+
+    var captureTemplates = function(elements) {
+        for(var i = 0; i < elements.length; i++) {
+            templates[i] = elements[i].innerHTML;
         }
     };
 
