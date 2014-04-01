@@ -109,13 +109,14 @@ DataBind.Binder = function(model, document) {
         //todo: what about data-class?
         //todo: what about data-click?
         //todo: what about input elements, etc?
+        //todo: what about descendants (make this recursive?)
 
         var dataBind = element.getAttribute('data-bind');
 
         if (dataBind === item) {
             element.innerHTML = model.get(items).value[iteration];
         } else if (dataBind.indexOf(item + '.') === 0) {
-            var prop = dataBind.replace(item + '.', '')
+            var prop = dataBind.replace(item + '.', '');
             element.innerHTML = model.get(items).value[iteration][prop];
         }
     };
@@ -142,6 +143,7 @@ DataBind.Binder = function(model, document) {
 
     var bindValue = function(element) {
         var name = element.getAttribute('data-bind');
+
         if (model.hasAttr(name)) {
             if (element.type === 'checkbox') {
                 element.checked = model.get(name);

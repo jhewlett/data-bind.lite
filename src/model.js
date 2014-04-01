@@ -46,7 +46,11 @@ DataBind.Model = function(scope) {
     };
 
     var hasAttr = function(name) {
-        return attrs.hasOwnProperty(name);
+        //todo: array access
+        //todo: more than one layer deep
+        var pieces = name.split('.');
+
+        return attrs.hasOwnProperty(pieces[0]) && (pieces.length === 1 || attrs[pieces[0]].hasOwnProperty(pieces[1]));
     };
 
     var setValueChanged = function(callback) {
@@ -58,7 +62,11 @@ DataBind.Model = function(scope) {
             return attrs[name].call(this);
         }
 
-        return attrs[name];
+        var pieces = name.split('.');
+
+        return pieces.length > 1
+            ? attrs[pieces[0]][pieces[1]]
+            : attrs[name];
     };
 
     return {

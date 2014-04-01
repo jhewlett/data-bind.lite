@@ -19,6 +19,7 @@ var model = new DataBind.Model('one');
 //});
 
 model.attr('items', [{firstName: 'one'}, {firstName: 'two'}, {firstName: 'three'}]);
+model.attr('object', {firstName: 'test'});
 
 var binder = new DataBind.Binder(model);
 binder.bind();
