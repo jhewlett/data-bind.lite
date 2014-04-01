@@ -5,6 +5,7 @@ DataBind.Binder = function(model, document) {
     var scopeElement = doc.querySelector('[data-scope=' + model.scope + ']');
     var currentValue = {};
     var templates = [];
+    var foreach = [];
 
     model.setValueChanged(function(name) {
         var valueElements = scopeElement.querySelectorAll('[data-bind=' + name + ']');
@@ -62,9 +63,60 @@ DataBind.Binder = function(model, document) {
         captureTemplates(templateElements);
         bindTemplates(templateElements);
 
+        var foreachElements = scopeElement.querySelectorAll('[data-foreach]');
+        captureForeach(foreachElements);
+        bindForeach(foreachElements);
+
         var clickElements = scopeElement.querySelectorAll('[data-click]');
         for (var i = 0; i < clickElements.length; i++) {
             handleClick(clickElements[i]);
+        }
+    };
+
+    var captureForeach = function(elements) {
+        for (var i = 0; i < elements.length; i++) {
+            var templateChildren = [];
+            for (var j = 0; j < elements[i].children.length; j++) {
+                templateChildren.push(elements[i].children[j].cloneNode(true));
+            }
+
+            var forIn = elements[i].getAttribute('data-foreach');
+            var pieces = forIn.split('in');
+
+            console.log(pieces);
+
+            foreach[i] = {template: templateChildren, items: pieces[1].trim(), item: pieces[0].trim() };
+        }
+    };
+
+    var bindForeach = function(elements) {
+        for (var i = 0; i < elements.length; i++) {
+            elements[i].innerHTML = '';     //todo: make faster
+
+            var value = model.get(foreach[i].items);
+            for (var j = 0; j < value.length; j++) {
+                var clone = foreach[i].template[0].cloneNode(true);
+                elements[i].appendChild(clone);    //todo: handle multiple children
+
+                bindForeachNode(clone, foreach[i].items, foreach[i].item, j);
+                //todo: take care of any bindings
+            }
+        }
+    };
+
+    var bindForeachNode = function(element, items, item, iteration) {
+        //todo: what about {{ }} templates?
+        //todo: what about data-class?
+        //todo: what about data-click?
+        //todo: what about input elements, etc?
+
+        var dataBind = element.getAttribute('data-bind');
+
+        if (dataBind === item) {
+            element.innerHTML = model.get(items).value[iteration];
+        } else if (dataBind.indexOf(item + '.') === 0) {
+            var prop = dataBind.replace(item + '.', '')
+            element.innerHTML = model.get(items).value[iteration][prop];
         }
     };
 

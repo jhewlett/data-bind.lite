@@ -6,14 +6,17 @@
 </head>
 <body>
     <div data-scope="one">
+        <div data-foreach="item in items">
+            <div data-bind="item.firstName"></div>
+        </div>
         <!--My Collection:-->
-        <span data-bind="array"></span>  <br>
-        <button data-click="pop()">Add Text</button>
-        <p data-template>Hello {{firstName}} <span>{{lastName}} {{nonExistent}}</span></p>
-        <input type="text" data-bind="firstName"> <br>
-        <input type="text" data-bind="lastName" data-class="getClass">  <br>
-        <span data-bind="fullName"></span>  <br>
-        <span data-bind="sentence"></span>
+        <!--<span data-bind="array"></span>  <br>-->
+        <!--<button data-click="pop()">Add Text</button>-->
+        <!--<p data-template>Hello {{firstName}} <span>{{lastName}} {{nonExistent}}</span></p>-->
+        <!--<input type="text" data-bind="firstName"> <br>-->
+        <!--<input type="text" data-bind="lastName" data-class="getClass">  <br>-->
+        <!--<span data-bind="fullName"></span>  <br>-->
+        <!--<span data-bind="sentence"></span>-->
         <!--<input type="checkbox" data-bind="checked" >-->
         <!--<span data-bind="checked"></span>-->
 
