@@ -57,16 +57,28 @@ DataBind.Model = function(scope) {
         valueChanged = callback;
     };
 
-    var get = function(name) {
-        if (typeof attrs[name] === "function") {
-            return attrs[name].call(this);
-        }
-
+    var get = function(name, object) {
         var pieces = name.split('.');
 
-        return pieces.length > 1
-            ? attrs[pieces[0]][pieces[1]]
-            : attrs[name];
+        var rest = pieces.slice(1, pieces.length).join('.');
+
+        if (object !== undefined && pieces[0] === '') {
+            return object;
+        }
+        if (object !== undefined) {
+            return get(rest, eval('object.' + pieces[0]));
+        }
+        if (pieces.length === 1) {
+            return typeof attrs[name] === 'function'
+                ? attrs[name].call(this)
+                : attrs[name];
+        }
+
+        var object = typeof attrs[pieces[0]] === 'function'
+            ? attrs[pieces[0]].call(this)
+            : attrs[pieces[0]];
+
+        return get(rest, object);
     };
 
     return {

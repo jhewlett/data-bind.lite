@@ -9,6 +9,23 @@ describe('model', function() {
         expect(model.scope).toEqual("my scope");
     });
 
+    describe('getting object graph with one level', function() {
+        it('should dig into object', function() {
+            model.attr('object', {prop: 'value'})
+            expect(model.get('object.prop')).toEqual('value');
+        });
+
+        it('should dig into object graph two levels deep', function() {
+            model.attr('object', {prop: {prop2: 'value'}});
+            expect(model.get('object.prop.prop2')).toEqual('value');
+        });
+
+        it('should handle computed property in object graph', function() {
+            model.computed('computed', function() {return {computedProp: 4}});
+            expect(model.get('computed.computedProp')).toEqual(4);
+        });
+    });
+
     describe('computed properties with dependencies', function() {
         var valueChanged;
         beforeEach(function() {

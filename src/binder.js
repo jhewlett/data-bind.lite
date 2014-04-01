@@ -63,9 +63,9 @@ DataBind.Binder = function(model, document) {
         captureTemplates(templateElements);
         bindTemplates(templateElements);
 
-        var foreachElements = scopeElement.querySelectorAll('[data-foreach]');
-        captureForeach(foreachElements);
-        bindForeach(foreachElements);
+//        var foreachElements = scopeElement.querySelectorAll('[data-foreach]');
+//        captureForeach(foreachElements);
+//        bindForeach(foreachElements);
 
         var clickElements = scopeElement.querySelectorAll('[data-click]');
         for (var i = 0; i < clickElements.length; i++) {
