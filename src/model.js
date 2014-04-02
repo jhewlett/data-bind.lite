@@ -46,11 +46,7 @@ DataBind.Model = function(scope) {
     };
 
     var hasAttr = function(name) {
-        //todo: array access
-        //todo: more than one layer deep
-        var pieces = name.split('.');
-
-        return attrs.hasOwnProperty(pieces[0]) && (pieces.length === 1 || attrs[pieces[0]].hasOwnProperty(pieces[1]));
+        return get(name) !== undefined;
     };
 
     var setValueChanged = function(callback) {

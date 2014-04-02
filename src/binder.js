@@ -36,19 +36,23 @@ DataBind.Binder = function(model, document) {
 
     var bindClasses = function(elements) {
         for (var i = 0; i < elements.length; i++) {
-            var attrValue = elements[i].getAttribute('data-class');
+            bindClass(elements[i]);
+        }
+    };
 
-            var oldValue = currentValue[attrValue];
-            if (oldValue) {
-                elements[i].classList.remove(oldValue);
-            }
+    var bindClass = function(element) {
+        var attrValue = element.getAttribute('data-class');
 
-            var newClass = model.get(attrValue);
-            currentValue[attrValue] = newClass;
+        var oldValue = currentValue[attrValue];
+        if (oldValue) {
+            element.classList.remove(oldValue);
+        }
 
-            if (newClass) {
-                elements[i].classList.add(newClass);
-            }
+        var newClass = model.get(attrValue);
+        currentValue[attrValue] = newClass;
+
+        if (newClass) {
+            element.classList.add(newClass);
         }
     };
 
@@ -63,13 +67,13 @@ DataBind.Binder = function(model, document) {
         captureTemplates(templateElements);
         bindTemplates(templateElements);
 
-//        var foreachElements = scopeElement.querySelectorAll('[data-foreach]');
-//        captureForeach(foreachElements);
-//        bindForeach(foreachElements);
+        var foreachElements = scopeElement.querySelectorAll('[data-foreach]');
+        captureForeach(foreachElements);
+        bindForeach(foreachElements);
 
         var clickElements = scopeElement.querySelectorAll('[data-click]');
         for (var i = 0; i < clickElements.length; i++) {
-            handleClick(clickElements[i]);
+            bindClick(clickElements[i]);
         }
     };
 
@@ -82,8 +86,6 @@ DataBind.Binder = function(model, document) {
 
             var forIn = elements[i].getAttribute('data-foreach');
             var pieces = forIn.split('in');
-
-            console.log(pieces);
 
             foreach[i] = {template: templateChildren, items: pieces[1].trim(), item: pieces[0].trim() };
         }
@@ -98,26 +100,20 @@ DataBind.Binder = function(model, document) {
                 var clone = foreach[i].template[0].cloneNode(true);
                 elements[i].appendChild(clone);    //todo: handle multiple children
 
-                bindForeachNode(clone, foreach[i].items, foreach[i].item, j);
-                //todo: take care of any bindings
+                arrangeBinding(clone, 'data-bind', foreach[i], j);
+                arrangeBinding(clone, 'data-class', foreach[i], j);
+                arrangeBinding(clone, 'data-click', foreach[i], j);
+
+                bindValue(clone);
+                bindClass(clone);
+                bindClick(clone);
             }
         }
     };
 
-    var bindForeachNode = function(element, items, item, iteration) {
-        //todo: what about {{ }} templates?
-        //todo: what about data-class?
-        //todo: what about data-click?
-        //todo: what about input elements, etc?
-        //todo: what about descendants (make this recursive?)
-
-        var dataBind = element.getAttribute('data-bind');
-
-        if (dataBind === item) {
-            element.innerHTML = model.get(items).value[iteration];
-        } else if (dataBind.indexOf(item + '.') === 0) {
-            var prop = dataBind.replace(item + '.', '');
-            element.innerHTML = model.get(items).value[iteration][prop];
+    var arrangeBinding = function(element, attribute, template, index) {
+        if (element.hasAttribute(attribute)) {
+            element.setAttribute(attribute, element.getAttribute(attribute).replace(template.item, template.items + '[' + index + ']'))
         }
     };
 
@@ -127,7 +123,7 @@ DataBind.Binder = function(model, document) {
         }
     };
 
-    var handleClick = function(element) {
+    var bindClick = function(element) {
         var expression = element.getAttribute('data-click');
 
         element.onclick = function() {
@@ -171,18 +167,9 @@ DataBind.Binder = function(model, document) {
                     model.attr(name, element.value);
                 };
             } else {
-                element.innerHTML = getValue(name);
+                element.innerHTML = model.get(name);
             }
         }
-    };
-
-    var getValue = function(name) {
-        var attr = model.get(name);
-        if (attr.value) {
-            return attr.value;
-        }
-
-        return attr;
     };
 
     return {

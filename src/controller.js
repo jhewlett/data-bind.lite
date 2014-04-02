@@ -18,8 +18,11 @@ var model = new DataBind.Model('one');
 //    return this.get('firstName') === 'joe' ? 'hidden' : '';
 //});
 
-model.attr('items', [{firstName: 'one'}, {firstName: 'two'}, {firstName: 'three'}]);
-model.attr('object', {firstName: {lastName: 'test'}});
+model.attr('items', ['one', 'two', 'three']);
+
+model.log = function(value) {
+    console.log(value);
+};
 
 var binder = new DataBind.Binder(model);
 binder.bind();

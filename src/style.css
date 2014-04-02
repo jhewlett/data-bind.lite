@@ -1,3 +1,15 @@
 .hidden {
     display: none;
 }
+
+.one {
+    color: red;
+}
+
+.two {
+    color: blue;
+}
+
+.three {
+    color: green;
+}

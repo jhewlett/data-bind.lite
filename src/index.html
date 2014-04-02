@@ -6,11 +6,11 @@
 </head>
 <body>
     <div data-scope="one">
-        <!--<div data-foreach="item in items">-->
-            <!--<div data-bind="items[0].firstName"></div>-->
-        <!--</div>-->
+        <div data-foreach="item in items">
+            <div data-template="item">Number: {{item}}</div>
+        </div>
         <!--<div data-bind="items[0].firstName"></div>-->
-        <div data-bind="object.firstName.lastName"></div>
+
         <!--My Collection:-->
         <!--<span data-bind="array"></span>  <br>-->
         <!--<button data-click="pop()">Add Text</button>-->
