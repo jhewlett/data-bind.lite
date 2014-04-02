@@ -16,6 +16,7 @@ module.exports = function(config) {
     files: [
       '../src/model.js',
       '../src/binder.js',
+      '../src/collection.js',
       'model-specs.js',
       'binder-specs.js',
       'sinon-1.9.0.js'

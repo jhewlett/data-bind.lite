@@ -9,7 +9,7 @@ describe('model', function() {
         expect(model.scope).toEqual("my scope");
     });
 
-    describe('getting object graph with one level', function() {
+    describe('getting object graph', function() {
         it('should dig into object', function() {
             model.attr('object', {prop: 'value'})
             expect(model.get('object.prop')).toEqual('value');
@@ -23,6 +23,22 @@ describe('model', function() {
         it('should handle computed property in object graph', function() {
             model.computed('computed', function() {return {computedProp: 4}});
             expect(model.get('computed.computedProp')).toEqual(4);
+        });
+
+        it('should handle array access at beginning', function() {
+            model.attr('items', [{number: 0}, {number: 1}]);
+            expect(model.get('items[1].number')).toEqual(1);
+        });
+
+        it('should handle array access in middle', function() {
+            model.attr('object', {arr: [{number: 0}, {number: 1}]});
+            expect(model.get('object.arr[0].number')).toEqual(0);
+        });
+
+        it('should handle variable array access at beginning', function() {
+            model.attr('index', 1);
+            model.attr('items', [0, 1]);
+            expect(model.get('items[index]')).toEqual(1);
         });
     });
 

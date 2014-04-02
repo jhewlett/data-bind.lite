@@ -58,27 +58,46 @@ DataBind.Model = function(scope) {
     };
 
     var get = function(name, object) {
-        var pieces = name.split('.');
+        var dotPieces = name.split('.');
 
-        var rest = pieces.slice(1, pieces.length).join('.');
+        var arrayAccessRegex = /\[([^\]]+)\]/
+        var match = arrayAccessRegex.exec(dotPieces[0]);
 
-        if (object !== undefined && pieces[0] === '') {
+        var rest = dotPieces.slice(1, dotPieces.length).join('.');
+
+        if (match !== null) {
+            var prop = dotPieces[0].substring(0, match.index);
+            var capture = match[1];
+            var intRegex = /^\d+$/;
+
+            var index = intRegex.test(capture)
+                ? parseInt(capture)
+                : attrs[capture];
+
+            if (object !== undefined) {
+                return get(rest, eval('object.' + prop)[index]);
+            }
+
+            return get(rest, attrs[prop].value[index]);
+        }
+
+        if (object !== undefined && dotPieces[0] === '') {
             return object;
         }
         if (object !== undefined) {
-            return get(rest, eval('object.' + pieces[0]));
+            return get(rest, eval('object.' + dotPieces[0]));
         }
-        if (pieces.length === 1) {
+        if (dotPieces.length === 1) {
             return typeof attrs[name] === 'function'
                 ? attrs[name].call(this)
                 : attrs[name];
         }
 
-        var object = typeof attrs[pieces[0]] === 'function'
-            ? attrs[pieces[0]].call(this)
-            : attrs[pieces[0]];
+        var thisObject = typeof attrs[dotPieces[0]] === 'function'
+            ? attrs[dotPieces[0]].call(this)
+            : attrs[dotPieces[0]];
 
-        return get(rest, object);
+        return get(rest, thisObject);
     };
 
     return {
