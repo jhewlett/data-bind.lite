@@ -98,19 +98,21 @@ DataBind.Binder = function(model, document) {
 
             var value = model.get(foreach[i].items);
             for (var j = 0; j < value.length; j++) {
-                var clone = foreach[i].template[0].cloneNode(true);
-                elements[i].appendChild(clone);    //todo: handle multiple children
+                for (var k = 0; k < foreach[i].template.length; k++) {
+                    var clone = foreach[i].template[k].cloneNode(true);
+                    elements[i].appendChild(clone);    //todo: handle multiple children
 
-                //todo: and all descendants
+                    //todo: and all descendants
 
-                convertBinding(clone, 'data-bind', foreach[i], j);
-                convertBinding(clone, 'data-class', foreach[i], j);
-                convertBinding(clone, 'data-click', foreach[i], j);
-                convertTemplateBinding(clone, foreach[i], j);
+                    convertBinding(clone, 'data-bind', foreach[i], j);
+                    convertBinding(clone, 'data-class', foreach[i], j);
+                    convertBinding(clone, 'data-click', foreach[i], j);
+                    convertTemplateBinding(clone, foreach[i], j);
 
-                //bindValue(clone);
-                //bindClass(clone);
-                //bindClick(clone);
+                    //bindValue(clone);
+                    //bindClass(clone);
+                    //bindClick(clone);
+                }
             }
         }
     };
@@ -125,11 +127,19 @@ DataBind.Binder = function(model, document) {
 
             element.innerHTML = element.innerHTML.replace(regEx, foreachReplace);
         }
+
+        for(var i = 0; i < element.children.length; i++) {
+            convertTemplateBinding(element.children[i], template, index);
+        }
     };
 
     var convertBinding = function(element, attribute, template, index) {
         if (element.hasAttribute(attribute)) {
             element.setAttribute(attribute, element.getAttribute(attribute).replace(template.item, template.items + '[' + index + ']'))
+        }
+
+        for (var i = 0; i < element.children.length; i++) {
+            convertBinding(element.children[i], attribute, template, index);
         }
     };
 

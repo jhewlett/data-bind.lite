@@ -7,7 +7,11 @@
 <body>
     <div data-scope="one">
         <div data-foreach="item in items">
-            <div data-template>Number: {{item}}</div>
+            <div>
+                <div data-template>
+                    <div>Color: {{item.color}}</div>
+                </div>
+            </div>
         </div>
         <!--<div data-bind="items[0].firstName"></div>-->
 
