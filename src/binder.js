@@ -57,19 +57,20 @@ DataBind.Binder = function(model, document) {
     };
 
     var bind = function() {
+        var foreachElements = scopeElement.querySelectorAll('[data-foreach]');
+        captureForeach(foreachElements);
+        bindForeach(foreachElements);
+
+        var templateElements = scopeElement.querySelectorAll('[data-template]');
+        captureTemplates(templateElements);
+
         var valueElements = scopeElement.querySelectorAll('[data-bind]');
         bindValues(valueElements);
 
         var classElements = scopeElement.querySelectorAll('[data-class]');
         bindClasses(classElements);
 
-        var templateElements = scopeElement.querySelectorAll('[data-template]');
-        captureTemplates(templateElements);
         bindTemplates(templateElements);
-
-        var foreachElements = scopeElement.querySelectorAll('[data-foreach]');
-        captureForeach(foreachElements);
-        bindForeach(foreachElements);
 
         var clickElements = scopeElement.querySelectorAll('[data-click]');
         for (var i = 0; i < clickElements.length; i++) {
@@ -100,18 +101,33 @@ DataBind.Binder = function(model, document) {
                 var clone = foreach[i].template[0].cloneNode(true);
                 elements[i].appendChild(clone);    //todo: handle multiple children
 
-                arrangeBinding(clone, 'data-bind', foreach[i], j);
-                arrangeBinding(clone, 'data-class', foreach[i], j);
-                arrangeBinding(clone, 'data-click', foreach[i], j);
+                //todo: and all descendants
 
-                bindValue(clone);
-                bindClass(clone);
-                bindClick(clone);
+                convertBinding(clone, 'data-bind', foreach[i], j);
+                convertBinding(clone, 'data-class', foreach[i], j);
+                convertBinding(clone, 'data-click', foreach[i], j);
+                convertTemplateBinding(clone, foreach[i], j);
+
+                //bindValue(clone);
+                //bindClass(clone);
+                //bindClick(clone);
             }
         }
     };
 
-    var arrangeBinding = function(element, attribute, template, index) {
+    var convertTemplateBinding = function (element, template, index) {
+        if (element.hasAttribute('data-template')) {
+            var regEx = /{{[^}]+}}/g;
+
+            var foreachReplace = function (match) {
+                return match.replace(template.item, template.items + '[' + index + ']')
+            };
+
+            element.innerHTML = element.innerHTML.replace(regEx, foreachReplace);
+        }
+    };
+
+    var convertBinding = function(element, attribute, template, index) {
         if (element.hasAttribute(attribute)) {
             element.setAttribute(attribute, element.getAttribute(attribute).replace(template.item, template.items + '[' + index + ']'))
         }
