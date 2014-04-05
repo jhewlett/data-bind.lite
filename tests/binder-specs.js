@@ -12,6 +12,7 @@ describe('binder', function() {
         scopeElement.querySelectorAll.withArgs('[data-click]').returns([]);
         scopeElement.querySelectorAll.withArgs('[data-class]').returns([]);
         scopeElement.querySelectorAll.withArgs('[data-template]').returns([]);
+        scopeElement.querySelectorAll.withArgs('[data-foreach]').returns([]);
         documentStub.querySelector.withArgs('[data-scope=scope]').returns(scopeElement);
         binder = new DataBind.Binder(model, documentStub);
     });
@@ -89,9 +90,22 @@ describe('binder', function() {
 //            });
 //        });
 
-        describe('has value property', function() {
+        describe('text input', function() {
             beforeEach(function() {
-                element = sinon.stub({getAttribute: function() {}, tagName: '', value: ''});
+                element = sinon.stub({getAttribute: function() {}, tagName: '', type: 'text'});
+                element.getAttribute.withArgs('data-bind').returns('prop');
+                scopeElement.querySelectorAll.withArgs('[data-bind]').returns([element]);
+            });
+
+            it('should set value', function() {
+                binder.bind();
+                expect(element.value).toEqual('myValue');
+            });
+        });
+
+        describe('textarea input', function() {
+            beforeEach(function() {
+                element = sinon.stub({getAttribute: function() {}, tagName: '', type: 'textarea'});
                 element.getAttribute.withArgs('data-bind').returns('prop');
                 scopeElement.querySelectorAll.withArgs('[data-bind]').returns([element]);
             });

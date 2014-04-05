@@ -211,7 +211,7 @@ DataBind.Binder = function(model, document) {
                     model.attr(name, element.value);
                 };
             }
-            else if (element.value !== undefined) {
+            else if (element.type ==='text' || element.type === 'textarea') {
                 if (element.value !== modelValue) {
                     element.value = modelValue;
                 }

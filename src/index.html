@@ -6,18 +6,16 @@
 </head>
 <body>
     <div data-scope="one">
-        <button data-click="add()">Add item</button>
-        <br>
-        <div data-foreach="item in items">
-            <div data-template>
-                <div data-click="add()">
-                    <div data-class="item.color">Name: <span data-bind="item.firstName" />}}</div>
-                </div>
-            </div>
-        </div>
-        <input type="text" data-bind="firstName">
-        <div data-bind="firstName">
-        </div>
+        <!--<button data-click="add()">Add item</button>-->
+        <!--<br>-->
+        <ul data-foreach="item in items">
+            <li data-bind="item.firstName"></li>
+        </ul>
+
+        <input data-bind="firstName" type="text">
+        <textarea data-bind="firstName"></textarea>
+        <span data-bind="fullName"></span>
+
         <!--<div data-bind="items[0].firstName"></div>-->
 
         <!--My Collection:-->
