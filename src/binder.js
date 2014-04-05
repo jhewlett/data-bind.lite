@@ -6,7 +6,7 @@ DataBind.Binder = function(model, document) {
     var doc = document || window.document;
     var scopeElement = doc.querySelector('[data-scope=' + model.scope + ']');
     var currentValue = {};
-    var templates = [];
+    //var templates = [];
     var foreach = [];
 
     model.setValueChanged(valueChangedHandler);
@@ -17,21 +17,22 @@ DataBind.Binder = function(model, document) {
 
         bindElementsInForeach(foreachElements);
 
+        //var templateElements = scopeElement.querySelectorAll('[data-template]');
+        //captureTemplates(templateElements);
+        //bindTemplates(templateElements);
+
         var valueElements = scopeElement.querySelectorAll('[data-bind=' + name + ']');
         bindValues(valueElements);
 
         var classElements = scopeElement.querySelectorAll('[data-class=' + name + ']');
         bindClasses(classElements);
-
-        var templateElements = scopeElement.querySelectorAll('[data-template]');
-        captureTemplates(templateElements);
-        bindTemplates(templateElements);
     }
 
     var bindElementsInForeach = function(elements) {
         for (var i = 0; i < elements.length; i++) {
-            var templateElements = elements[i].querySelectorAll('[data-template]');
-            captureTemplates(templateElements);
+            //var templateElements = elements[i].querySelectorAll('[data-template]');
+            //captureTemplates(templateElements);
+            //bindTemplates(templateElements);
 
             var valueElements = elements[i].querySelectorAll('[data-bind]');
             bindValues(valueElements);
@@ -39,28 +40,26 @@ DataBind.Binder = function(model, document) {
             var classElements = elements[i].querySelectorAll('[data-class]');
             bindClasses(classElements);
 
-            bindTemplates(templateElements);
-
             var clickElements = elements[i].querySelectorAll('[data-click]');
             bindClicks(clickElements);
         }
     };
 
-    var bindTemplates = function(elements) {
-        for (var i = 0; i < elements.length; i++) {
-            var regEx = /{{([^}]+)}}/g;
+//    var bindTemplates = function(elements) {
+//        for (var i = 0; i < elements.length; i++) {
+//            var regEx = /{{([^}]+)}}/g;
+//
+//            elements[i].innerHTML = templates[i].replace(regEx, fillValue);
+//        }
+//    };
 
-            elements[i].innerHTML = templates[i].replace(regEx, fillValue);
-        }
-    };
-
-    var fillValue = function(match, group1) {
-        var value = model.get(group1);
-
-        return value !== undefined
-            ? value
-            : '';
-    };
+//    var fillValue = function(match, group1) {
+//        var value = model.get(group1);
+//
+//        return value !== undefined
+//            ? value
+//            : '';
+//    };
 
     var bindClasses = function(elements) {
         for (var i = 0; i < elements.length; i++) {
@@ -89,16 +88,15 @@ DataBind.Binder = function(model, document) {
         captureForeach(foreachElements);
         bindForeach(foreachElements);
 
-        var templateElements = scopeElement.querySelectorAll('[data-template]');
-        captureTemplates(templateElements);
+        //var templateElements = scopeElement.querySelectorAll('[data-template]');
+        //captureTemplates(templateElements);
+        //bindTemplates(templateElements);
 
         var valueElements = scopeElement.querySelectorAll('[data-bind]');
         bindValues(valueElements);
 
         var classElements = scopeElement.querySelectorAll('[data-class]');
         bindClasses(classElements);
-
-        bindTemplates(templateElements);
 
         var clickElements = scopeElement.querySelectorAll('[data-click]');
         bindClicks(clickElements);
@@ -169,11 +167,11 @@ DataBind.Binder = function(model, document) {
         }
     };
 
-    var captureTemplates = function(elements) {
-        for(var i = 0; i < elements.length; i++) {
-            templates[i] = elements[i].innerHTML;
-        }
-    };
+//    var captureTemplates = function(elements) {
+//        for(var i = 0; i < elements.length; i++) {
+//            templates[i] = elements[i].innerHTML;
+//        }
+//    };
 
     var bindClick = function(element) {
         var expression = element.getAttribute('data-click');
