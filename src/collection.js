@@ -21,6 +21,6 @@ DataBind.Collection = function(name, arr, valueChangedCallback) {
         pop: pop,
         value: arr,
         set: set,
-        length: arr.length
+        length: function() { return arr.length; }
     };
 };

@@ -7,7 +7,14 @@ DataBind.Binder = function(model, document) {
     var templates = [];
     var foreach = [];
 
-    model.setValueChanged(function(name) {
+    model.setValueChanged(valueChangedHandler);
+
+    function valueChangedHandler(name) {
+        var foreachElements = scopeElement.querySelectorAll('[data-foreach]');
+        bindForeach(foreachElements);
+
+        bindElementsInForeach(foreachElements);
+
         var valueElements = scopeElement.querySelectorAll('[data-bind=' + name + ']');
         bindValues(valueElements);
 
@@ -15,8 +22,27 @@ DataBind.Binder = function(model, document) {
         bindClasses(classElements);
 
         var templateElements = scopeElement.querySelectorAll('[data-template]');
+        captureTemplates(templateElements);
         bindTemplates(templateElements);
-    });
+    }
+
+    var bindElementsInForeach = function(elements) {
+        for (var i = 0; i < elements.length; i++) {
+            var templateElements = elements[i].querySelectorAll('[data-template]');
+            captureTemplates(templateElements);
+
+            var valueElements = elements[i].querySelectorAll('[data-bind]');
+            bindValues(valueElements);
+
+            var classElements = elements[i].querySelectorAll('[data-class]');
+            bindClasses(classElements);
+
+            bindTemplates(templateElements);
+
+            var clickElements = elements[i].querySelectorAll('[data-click]');
+            bindClicks(clickElements);
+        }
+    };
 
     var bindTemplates = function(elements) {
         for (var i = 0; i < elements.length; i++) {
@@ -73,8 +99,12 @@ DataBind.Binder = function(model, document) {
         bindTemplates(templateElements);
 
         var clickElements = scopeElement.querySelectorAll('[data-click]');
-        for (var i = 0; i < clickElements.length; i++) {
-            bindClick(clickElements[i]);
+        bindClicks(clickElements);
+    };
+
+    var bindClicks = function(elements) {
+        for (var i = 0; i < elements.length; i++) {
+            bindClick(elements[i]);
         }
     };
 
@@ -88,7 +118,7 @@ DataBind.Binder = function(model, document) {
             var forIn = elements[i].getAttribute('data-foreach');
             var pieces = forIn.split('in');
 
-            foreach[i] = {template: templateChildren, items: pieces[1].trim(), item: pieces[0].trim() };
+            foreach[i] = { template: templateChildren, items: pieces[1].trim(), item: pieces[0].trim() };
         }
     };
 
@@ -97,21 +127,15 @@ DataBind.Binder = function(model, document) {
             elements[i].innerHTML = '';     //todo: make faster
 
             var value = model.get(foreach[i].items);
-            for (var j = 0; j < value.length; j++) {
+            for (var j = 0; j < value.length(); j++) {
                 for (var k = 0; k < foreach[i].template.length; k++) {
                     var clone = foreach[i].template[k].cloneNode(true);
-                    elements[i].appendChild(clone);    //todo: handle multiple children
-
-                    //todo: and all descendants
+                    elements[i].appendChild(clone);
 
                     convertBinding(clone, 'data-bind', foreach[i], j);
                     convertBinding(clone, 'data-class', foreach[i], j);
                     convertBinding(clone, 'data-click', foreach[i], j);
                     convertTemplateBinding(clone, foreach[i], j);
-
-                    //bindValue(clone);
-                    //bindClass(clone);
-                    //bindClick(clone);
                 }
             }
         }
