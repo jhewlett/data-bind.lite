@@ -1,3 +1,5 @@
+"use strict";
+
 var model = new DataBind.Model('one');
 
 model.attr('firstName', 'Justin');
@@ -5,11 +7,9 @@ model.attr('lastName', 'Hewlett');
 //model.attr('checked', true);
 //model.attr('sex', 'male');
 model.computed('fullName', function() {
-    console.log(this);
     return this.get('firstName') + ' ' + this.get('lastName');
 });
 model.computed('sentence', function() {
-    //console.log(this)
     return this.get("fullName") + ' went to the store';
 });
 //model.attr('array', [1, 2, 3]);

@@ -1,3 +1,5 @@
+"use strict";
+
 var DataBind = DataBind || {};
 
 DataBind.Model = function(scope) {
@@ -45,10 +47,6 @@ DataBind.Model = function(scope) {
         dependsOn[dependency].push(name);
     };
 
-    var hasAttr = function(name) {
-        return get(name) !== undefined;
-    };
-
     var setValueChanged = function(callback) {
         valueChanged = callback;
     };
@@ -56,7 +54,7 @@ DataBind.Model = function(scope) {
     var get = function(name, object) {
         var dotPieces = name.split('.');
 
-        var arrayAccessRegex = /\[([^\]]+)\]/
+        var arrayAccessRegex = /\[([^\]]+)\]/;
         var match = arrayAccessRegex.exec(dotPieces[0]);
 
         var rest = dotPieces.slice(1, dotPieces.length).join('.');
@@ -71,17 +69,17 @@ DataBind.Model = function(scope) {
                 : attrs[capture];
 
             if (object !== undefined) {
-                return get(rest, eval('object.' + prop)[index]);
+                return get.call(this, rest, eval('object.' + prop)[index]);
             }
 
-            return get(rest, attrs[prop].value[index]);
+            return get.call(this, rest, attrs[prop].value[index]);
         }
 
         if (object !== undefined && dotPieces[0] === '') {
             return object;
         }
         if (object !== undefined) {
-            return get(rest, eval('object.' + dotPieces[0]));
+            return get.call(this, rest, eval('object.' + dotPieces[0]));
         }
         if (dotPieces.length === 1) {
             return typeof attrs[name] === 'function'
@@ -93,14 +91,13 @@ DataBind.Model = function(scope) {
             ? attrs[dotPieces[0]].call(this)
             : attrs[dotPieces[0]];
 
-        return get(rest, thisObject);
+        return get.call(this, rest, thisObject);
     };
 
     return {
         attr: attr,
         get: get,
         computed: computed,
-        hasAttr: hasAttr,
         scope: scope,
         setValueChanged: setValueChanged
     };
