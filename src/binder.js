@@ -21,10 +21,10 @@ DataBind.Binder = function(model, document) {
         //captureTemplates(templateElements);
         //bindTemplates(templateElements);
 
-        var valueElements = scopeElement.querySelectorAll('[data-bind=' + name + ']');
+        var valueElements = scopeElement.querySelectorAll('[data-bind="' + name + '"]');
         bindValues(valueElements);
 
-        var classElements = scopeElement.querySelectorAll('[data-class=' + name + ']');
+        var classElements = scopeElement.querySelectorAll('[data-class="' + name + '"]');
         bindClasses(classElements);
     }
 

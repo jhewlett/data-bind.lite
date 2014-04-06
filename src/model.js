@@ -8,6 +8,26 @@ DataBind.Model = function(scope) {
     var valueChanged = function(name) { };
 
     var attr = function(name, value) {
+        var arrayAccessRegex = /\[([^\]]+)\]/;
+        var match = arrayAccessRegex.exec(name);
+
+        if (match !== null) {
+            var prop = name.substring(0, match.index);
+            var capture = match[1];
+            //var intRegex = /^\d+$/;
+
+//            var index = intRegex.test(capture)
+//                ? parseInt(capture)
+//                : attrs[capture];
+
+            var index = parseInt(capture);
+
+            attrs[prop].value[index] = value;
+            fireValueChangedForAllDependencies(name);
+
+            return;
+        }
+
         if (Array.isArray(value)) {
             addCollection(name, value);
         } else {

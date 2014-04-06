@@ -20,7 +20,7 @@ model.computed('sentence', function() {
 //    return this.get('firstName') === 'joe' ? 'hidden' : '';
 //});
 
-model.attr('items', [{firstName: 'joe', color: 'one'}, {firstName: 'john', color: 'two'}, {firstName: 'my', color: 'three'}]);
+model.attr('items', ['joe', 'john', 'my']);
 //model.attr('items2', [{firstName: 'joe', color: '1'}, {firstName: 'john', color: '2'}, {firstName: 'my', color: '3'}]);
 
 model.add = function() {

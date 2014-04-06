@@ -36,8 +36,8 @@ describe('binder', function() {
 
             describe('when the value changes to a new value', function() {
                 beforeEach(function() {
-                    scopeElement.querySelectorAll.withArgs('[data-class=prop]').returns([element]);
-                    scopeElement.querySelectorAll.withArgs('[data-bind=prop]').returns([]);
+                    scopeElement.querySelectorAll.withArgs('[data-class="prop"]').returns([element]);
+                    scopeElement.querySelectorAll.withArgs('[data-bind="prop"]').returns([]);
                 });
 
                 it('should update the class', function() {

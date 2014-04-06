@@ -9,6 +9,36 @@ describe('model', function() {
         expect(model.scope).toEqual("my scope");
     });
 
+    describe('calling attr with array index', function() {
+        var valueChanged;
+        beforeEach(function() {
+            valueChanged = sinon.stub();
+            model.setValueChanged(valueChanged);
+            model.attr('items', [0]);
+        });
+
+        it('should update value in array', function() {
+            model.attr('items[0]', 5);
+            expect(model.get('items[0]')).toEqual(5);
+            expect(valueChanged.calledWith('items[0]')).toBeTruthy();
+        });
+    });
+
+//    describe('calling attr with dot property syntax', function() {
+//        var valueChanged;
+//        beforeEach(function() {
+//            valueChanged = sinon.stub();
+//            model.setValueChanged(valueChanged);
+//            model.attr('object', [0]);
+//        });
+//
+//        it('should update property on object', function() {
+//            model.attr('items[0]', 5);
+//            expect(model.get('items[0]')).toEqual(5);
+//            expect(valueChanged.calledWith('items[0]')).toBeTruthy();
+//        });
+//    });
+
     describe('getting object graph', function() {
         it('should dig into object', function() {
             model.attr('object', {prop: 'value'})

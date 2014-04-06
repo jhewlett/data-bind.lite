@@ -9,12 +9,10 @@
         <!--<button data-click="add()">Add item</button>-->
         <!--<br>-->
         <ul data-foreach="item in items">
-            <li data-bind="item.firstName"></li>
+            <li data-bind="item"></li>
         </ul>
 
-        <input data-bind="firstName" type="text">
-        <textarea data-bind="firstName"></textarea>
-        <span data-bind="fullName"></span>
+        <input data-bind="items[0]" type="text">
 
         <!--<div data-bind="items[0].firstName"></div>-->
 
