@@ -22,22 +22,13 @@ DataBind.Model = function(scope) {
 
             var index = parseInt(capture);
 
-            attrs[prop].value[index] = value;
+            attrs[prop][index] = value;
             fireValueChangedForAllDependencies(name);
 
             return;
         }
 
-        if (Array.isArray(value)) {
-            addCollection(name, value);
-        } else {
-            attrs[name] = value;
-        }
-        fireValueChangedForAllDependencies(name);
-    };
-
-    var addCollection = function(name, value) {
-        attrs[name] = new DataBind.Collection(name, value, fireValueChangedForAllDependencies);
+        attrs[name] = value;
         fireValueChangedForAllDependencies(name);
     };
 
@@ -71,8 +62,16 @@ DataBind.Model = function(scope) {
         valueChanged = callback;
     };
 
-    var get = function(name, object) {
-        var dotPieces = name.split('.');
+    var checkWrapArray = function(name, object) {
+        return Array.isArray(object)
+            ? new DataBind.Collection(name, object, fireValueChangedForAllDependencies)
+            : object;
+    };
+
+    var get = function(partialName, object, fullName) {
+        fullName = fullName || partialName;
+
+        var dotPieces = partialName.split('.');
 
         var arrayAccessRegex = /\[([^\]]+)\]/;
         var match = arrayAccessRegex.exec(dotPieces[0]);
@@ -89,29 +88,31 @@ DataBind.Model = function(scope) {
                 : attrs[capture];
 
             if (object !== undefined) {
-                return get.call(this, rest, eval('object.' + prop)[index]);
+                return get.call(this, rest, eval('object.' + prop)[index], fullName);
             }
 
-            return get.call(this, rest, attrs[prop].value[index]);
+            return get.call(this, rest, attrs[prop][index], fullName);
         }
 
         if (object !== undefined && dotPieces[0] === '') {
-            return object;
+            return checkWrapArray(fullName, object);
         }
         if (object !== undefined) {
-            return get.call(this, rest, eval('object.' + dotPieces[0]));
+            return get.call(this, rest, eval('object.' + dotPieces[0]), fullName);
         }
         if (dotPieces.length === 1) {
-            return typeof attrs[name] === 'function'
-                ? attrs[name].call(this)
-                : attrs[name];
+            if (typeof attrs[partialName] === 'function') {
+                return attrs[partialName].call(this);
+            } else {
+                return checkWrapArray(partialName, attrs[partialName]);
+            }
         }
 
         var thisObject = typeof attrs[dotPieces[0]] === 'function'
             ? attrs[dotPieces[0]].call(this)
             : attrs[dotPieces[0]];
 
-        return get.call(this, rest, thisObject);
+        return get.call(this, rest, thisObject, fullName);
     };
 
     return {

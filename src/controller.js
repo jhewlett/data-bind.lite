@@ -12,16 +12,8 @@ model.computed('fullName', function() {
 model.computed('sentence', function() {
     return this.get("fullName") + ' went to the store';
 });
-//model.attr('array', [1, 2, 3]);
-//model.pop = function() {
-//    this.get('array').pop();
-//};
-//model.computed('getClass', function() {
-//    return this.get('firstName') === 'joe' ? 'hidden' : '';
-//});
 
 model.attr('items', ['joe', 'john', 'my']);
-//model.attr('items2', [{firstName: 'joe', color: '1'}, {firstName: 'john', color: '2'}, {firstName: 'my', color: '3'}]);
 
 model.add = function() {
     this.get('items').push({firstName: 'john', color: 'four'});

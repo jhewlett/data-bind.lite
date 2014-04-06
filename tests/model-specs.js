@@ -24,6 +24,43 @@ describe('model', function() {
         });
     });
 
+    describe('pushing to array', function() {
+        var valueChanged;
+        beforeEach(function() {
+            valueChanged = sinon.stub();
+            model.setValueChanged(valueChanged);
+            model.attr('arr', [0]);
+            model.get('arr').push(1);
+        });
+
+        it('should call value changed', function() {
+            expect(valueChanged.calledWith('arr')).toBeTruthy();
+            expect(valueChanged.calledTwice).toBeTruthy();
+        });
+
+        it('should push to array', function() {
+            expect(model.get('arr').value).toEqual([0, 1]);
+        });
+    });
+
+    describe('pushing to inner array', function() {
+        var valueChanged;
+        beforeEach(function() {
+            valueChanged = sinon.stub();
+            model.setValueChanged(valueChanged);
+            model.attr('arr', {inner: [1]});
+            model.get('arr.inner').push(2);
+        });
+
+        it('should call value changed', function() {
+            expect(valueChanged.calledWith('arr.inner')).toBeTruthy();
+        });
+
+        it('should push to array', function() {
+            expect(model.get('arr.inner').value).toEqual([1, 2]);
+        });
+    });
+
 //    describe('calling attr with dot property syntax', function() {
 //        var valueChanged;
 //        beforeEach(function() {
