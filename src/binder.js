@@ -127,7 +127,7 @@ DataBind.Binder = function(model, document) {
             elements[i].innerHTML = '';     //todo: make faster
 
             var value = model.get(foreach[i].items);
-            for (var j = 0; j < value.length(); j++) {
+            for (var j = 0; j < value.length; j++) {
                 for (var k = 0; k < foreach[i].template.length; k++) {
                     var clone = foreach[i].template[k].cloneNode(true);
                     elements[i].appendChild(clone);
@@ -141,21 +141,21 @@ DataBind.Binder = function(model, document) {
         }
     };
 
-    var convertTemplateBinding = function (element, template, index) {
-        if (element.hasAttribute('data-template')) {
-            var regEx = /{{[^}]+}}/g;
-
-            var foreachReplace = function (match) {
-                return match.replace(template.item, template.items + '[' + index + ']')
-            };
-
-            element.innerHTML = element.innerHTML.replace(regEx, foreachReplace);
-        }
-
-        for(var i = 0; i < element.children.length; i++) {
-            convertTemplateBinding(element.children[i], template, index);
-        }
-    };
+//    var convertTemplateBinding = function (element, template, index) {
+//        if (element.hasAttribute('data-template')) {
+//            var regEx = /{{[^}]+}}/g;
+//
+//            var foreachReplace = function (match) {
+//                return match.replace(template.item, template.items + '[' + index + ']')
+//            };
+//
+//            element.innerHTML = element.innerHTML.replace(regEx, foreachReplace);
+//        }
+//
+//        for(var i = 0; i < element.children.length; i++) {
+//            convertTemplateBinding(element.children[i], template, index);
+//        }
+//    };
 
     var convertBinding = function(element, attribute, template, index) {
         if (element.hasAttribute(attribute)) {

@@ -7,29 +7,63 @@ DataBind.Model = function(scope) {
     var dependsOn = {};
     var valueChanged = function(name) { };
 
-    var attr = function(name, value) {
+    var attr = function(name, value, object, fullName) {
+        fullName = fullName || name;
+
+        var dotPieces = name.split('.');
+
         var arrayAccessRegex = /\[([^\]]+)\]/;
-        var match = arrayAccessRegex.exec(name);
+        var match = arrayAccessRegex.exec(dotPieces[0]);
+
+        var rest = dotPieces.slice(1, dotPieces.length).join('.');
 
         if (match !== null) {
-            var prop = name.substring(0, match.index);
+            var prop = dotPieces[0].substring(0, match.index);
             var capture = match[1];
-            //var intRegex = /^\d+$/;
+            var intRegex = /^\d+$/;
 
-//            var index = intRegex.test(capture)
-//                ? parseInt(capture)
-//                : attrs[capture];
+            var index = intRegex.test(capture)
+                ? parseInt(capture)
+                : attrs[capture];
 
-            var index = parseInt(capture);
+            if (object !== undefined) {
+                attr(rest, value, eval('object.' + prop)[index], fullName);
+                return;
+            }
 
-            attrs[prop][index] = value;
-            fireValueChangedForAllDependencies(name);
+            if (dotPieces.length === 1) {
+                attrs[prop][index] = value;
+                fireValueChangedForAllDependencies(fullName);
+                return;
+            }
 
+            attr(rest, value, attrs[prop][index], fullName);
             return;
         }
 
-        attrs[name] = value;
-        fireValueChangedForAllDependencies(name);
+        if (object !== undefined) {
+            if (dotPieces[0] === '') {
+                object = value;
+                fireValueChangedForAllDependencies(fullName);
+                return;
+            }
+
+            if (dotPieces.length === 1) {
+                object[dotPieces[0]] = value;
+                fireValueChangedForAllDependencies(fullName);
+                return;
+            }
+
+            attr(rest, value, eval('object.' + dotPieces[0]), fullName);
+            return;
+        }
+        if (dotPieces.length === 1) {
+            attrs[name] = value;
+            fireValueChangedForAllDependencies(name);
+            return;
+        }
+
+        attr(rest, value, attrs[dotPieces[0]], fullName);
     };
 
     var fireValueChangedForAllDependencies = function(name) {
@@ -68,10 +102,10 @@ DataBind.Model = function(scope) {
             : object;
     };
 
-    var get = function(partialName, object, fullName) {
-        fullName = fullName || partialName;
+    var get = function(name, object, fullName) {
+        fullName = fullName || name;
 
-        var dotPieces = partialName.split('.');
+        var dotPieces = name.split('.');
 
         var arrayAccessRegex = /\[([^\]]+)\]/;
         var match = arrayAccessRegex.exec(dotPieces[0]);
@@ -94,18 +128,19 @@ DataBind.Model = function(scope) {
             return get.call(this, rest, attrs[prop][index], fullName);
         }
 
-        if (object !== undefined && dotPieces[0] === '') {
-            return checkWrapArray(fullName, object);
-        }
         if (object !== undefined) {
+            if (dotPieces[0] === '') {
+                return checkWrapArray(fullName, object);
+            }
+
             return get.call(this, rest, eval('object.' + dotPieces[0]), fullName);
         }
         if (dotPieces.length === 1) {
-            if (typeof attrs[partialName] === 'function') {
-                return attrs[partialName].call(this);
-            } else {
-                return checkWrapArray(partialName, attrs[partialName]);
+            if (typeof attrs[name] === 'function') {
+                return attrs[name].call(this);
             }
+
+            return checkWrapArray(name, attrs[name]);
         }
 
         var thisObject = typeof attrs[dotPieces[0]] === 'function'

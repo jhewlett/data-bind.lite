@@ -61,20 +61,35 @@ describe('model', function() {
         });
     });
 
-//    describe('calling attr with dot property syntax', function() {
-//        var valueChanged;
-//        beforeEach(function() {
-//            valueChanged = sinon.stub();
-//            model.setValueChanged(valueChanged);
-//            model.attr('object', [0]);
-//        });
-//
-//        it('should update property on object', function() {
-//            model.attr('items[0]', 5);
-//            expect(model.get('items[0]')).toEqual(5);
-//            expect(valueChanged.calledWith('items[0]')).toBeTruthy();
-//        });
-//    });
+    describe('calling attr with dot property syntax', function() {
+        var valueChanged;
+        beforeEach(function() {
+            valueChanged = sinon.stub();
+            model.setValueChanged(valueChanged);
+            model.attr('object', {firstName: ''});
+        });
+
+        it('should update property on object', function() {
+            model.attr('object.firstName', 'john');
+            expect(model.get('object.firstName')).toEqual('john');
+            expect(valueChanged.calledWith('object.firstName')).toBeTruthy();
+        });
+    });
+
+    describe('calling attr with multiple layers of dot property syntax and array indexing', function() {
+        var valueChanged;
+        beforeEach(function() {
+            valueChanged = sinon.stub();
+            model.setValueChanged(valueChanged);
+            model.attr('object', {items: [{firstName: ''}]});
+        });
+
+        it('should update property on object', function() {
+            model.attr('object.items[0].firstName', 'john');
+            expect(model.get('object.items[0].firstName')).toEqual('john');
+            expect(valueChanged.calledWith('object.items[0].firstName')).toBeTruthy();
+        });
+    });
 
     describe('getting object graph', function() {
         it('should dig into object', function() {
