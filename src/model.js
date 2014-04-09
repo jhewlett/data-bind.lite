@@ -29,42 +29,28 @@ DataBind.Model = function(scope) {
 
             if (object !== undefined) {
                 attr(rest, value, eval('object.' + prop)[index], fullName);
-                return;
-            }
-
-            if (dotPieces.length === 1) {
+            } else if (dotPieces.length === 1) {
                 attrs[prop][index] = value;
                 fireValueChangedForAllDependencies(fullName);
-                return;
+            } else {
+                attr(rest, value, attrs[prop][index], fullName);
             }
-
-            attr(rest, value, attrs[prop][index], fullName);
-            return;
-        }
-
-        if (object !== undefined) {
+        } else if (object !== undefined) {
             if (dotPieces[0] === '') {
                 object = value;
                 fireValueChangedForAllDependencies(fullName);
-                return;
-            }
-
-            if (dotPieces.length === 1) {
+            } else if (dotPieces.length === 1) {
                 object[dotPieces[0]] = value;
                 fireValueChangedForAllDependencies(fullName);
-                return;
+            } else {
+                attr(rest, value, eval('object.' + dotPieces[0]), fullName);
             }
-
-            attr(rest, value, eval('object.' + dotPieces[0]), fullName);
-            return;
-        }
-        if (dotPieces.length === 1) {
+        } else if (dotPieces.length === 1) {
             attrs[name] = value;
             fireValueChangedForAllDependencies(name);
-            return;
+        } else {
+            attr(rest, value, attrs[dotPieces[0]], fullName);
         }
-
-        attr(rest, value, attrs[dotPieces[0]], fullName);
     };
 
     var get = function(name, object, fullName) {
