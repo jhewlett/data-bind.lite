@@ -19,13 +19,11 @@ DataBind.Model = function(scope) {
         var dotPieces = name.split('.');
         var rest = dotPieces.slice(1, dotPieces.length).join('.');
 
-        var match = getArrayIndexerMatch(dotPieces[0]);
+        var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
 
-        if (match !== null) {
-            var prop = dotPieces[0].substring(0, match.index);
-            var capture = match[1];
-
-            var index = getIndex(capture);
+        if (arrayIndexer !== null) {
+            var prop = dotPieces[0].substring(0, arrayIndexer.index);
+            var index = getIndex(arrayIndexer[1]);
 
             if (object !== undefined) {
                 attr(rest, value, eval('object.' + prop)[index], fullName);
@@ -59,13 +57,11 @@ DataBind.Model = function(scope) {
         var dotPieces = name.split('.')
         var rest = dotPieces.slice(1, dotPieces.length).join('.');
 
-        var match = getArrayIndexerMatch(dotPieces[0]);
+        var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
 
-        if (match !== null) {
-            var prop = dotPieces[0].substring(0, match.index);
-            var capture = match[1];
-
-            var index = getIndex(capture);
+        if (arrayIndexer !== null) {
+            var prop = dotPieces[0].substring(0, arrayIndexer.index);
+            var index = getIndex(arrayIndexer[1]);
 
             if (object !== undefined) {
                 return get.call(this, rest, eval('object.' + prop)[index], fullName);
