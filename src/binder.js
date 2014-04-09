@@ -127,7 +127,7 @@ DataBind.Binder = function(model, document) {
             elements[i].innerHTML = '';     //todo: make faster
 
             var value = model.get(foreach[i].items);
-            for (var j = 0; j < value.length; j++) {
+            for (var j = 0; j < value.length(); j++) {
                 for (var k = 0; k < foreach[i].template.length; k++) {
                     var clone = foreach[i].template[k].cloneNode(true);
                     elements[i].appendChild(clone);
@@ -135,7 +135,7 @@ DataBind.Binder = function(model, document) {
                     convertBinding(clone, 'data-bind', foreach[i], j);
                     convertBinding(clone, 'data-class', foreach[i], j);
                     convertBinding(clone, 'data-click', foreach[i], j);
-                    convertTemplateBinding(clone, foreach[i], j);
+                    //convertTemplateBinding(clone, foreach[i], j);
                 }
             }
         }
