@@ -7,24 +7,25 @@ DataBind.Model = function(scope) {
     var dependsOn = {};
     var valueChanged = function(name) { };
 
+    var getArrayIndexerMatch = function(name) {
+        var arrayAccessRegex = /\[([^\]]+)\]/;
+
+        return arrayAccessRegex.exec(name);
+    };
+
     var attr = function(name, value, object, fullName) {
         fullName = fullName || name;
 
         var dotPieces = name.split('.');
-
-        var arrayAccessRegex = /\[([^\]]+)\]/;
-        var match = arrayAccessRegex.exec(dotPieces[0]);
-
         var rest = dotPieces.slice(1, dotPieces.length).join('.');
+
+        var match = getArrayIndexerMatch(dotPieces[0]);
 
         if (match !== null) {
             var prop = dotPieces[0].substring(0, match.index);
             var capture = match[1];
-            var intRegex = /^\d+$/;
 
-            var index = intRegex.test(capture)
-                ? parseInt(capture)
-                : attrs[capture];
+            var index = getIndex(capture);
 
             if (object !== undefined) {
                 attr(rest, value, eval('object.' + prop)[index], fullName);
@@ -66,6 +67,49 @@ DataBind.Model = function(scope) {
         attr(rest, value, attrs[dotPieces[0]], fullName);
     };
 
+    var get = function(name, object, fullName) {
+        fullName = fullName || name;
+
+        var dotPieces = name.split('.')
+        var rest = dotPieces.slice(1, dotPieces.length).join('.');
+
+        var match = getArrayIndexerMatch(dotPieces[0]);
+
+        if (match !== null) {
+            var prop = dotPieces[0].substring(0, match.index);
+            var capture = match[1];
+
+            var index = getIndex(capture);
+
+            if (object !== undefined) {
+                return get.call(this, rest, eval('object.' + prop)[index], fullName);
+            }
+
+            return get.call(this, rest, attrs[prop][index], fullName);
+        }
+
+        if (object !== undefined) {
+            if (dotPieces[0] === '') {
+                return checkWrapArray(fullName, object);
+            }
+
+            return get.call(this, rest, eval('object.' + dotPieces[0]), fullName);
+        }
+        if (dotPieces.length === 1) {
+            if (typeof attrs[name] === 'function') {
+                return attrs[name].call(this);
+            }
+
+            return checkWrapArray(name, attrs[name]);
+        }
+
+        var thisObject = typeof attrs[dotPieces[0]] === 'function'
+            ? attrs[dotPieces[0]].call(this)
+            : attrs[dotPieces[0]];
+
+        return get.call(this, rest, thisObject, fullName);
+    };
+
     var fireValueChangedForAllDependencies = function(name) {
         valueChanged(name);
         if (dependsOn.hasOwnProperty(name)) {
@@ -102,52 +146,12 @@ DataBind.Model = function(scope) {
             : object;
     };
 
-    var get = function(name, object, fullName) {
-        fullName = fullName || name;
+    var getIndex = function(capture) {
+        var intRegex = /^\d+$/;
 
-        var dotPieces = name.split('.');
-
-        var arrayAccessRegex = /\[([^\]]+)\]/;
-        var match = arrayAccessRegex.exec(dotPieces[0]);
-
-        var rest = dotPieces.slice(1, dotPieces.length).join('.');
-
-        if (match !== null) {
-            var prop = dotPieces[0].substring(0, match.index);
-            var capture = match[1];
-            var intRegex = /^\d+$/;
-
-            var index = intRegex.test(capture)
-                ? parseInt(capture)
-                : attrs[capture];
-
-            if (object !== undefined) {
-                return get.call(this, rest, eval('object.' + prop)[index], fullName);
-            }
-
-            return get.call(this, rest, attrs[prop][index], fullName);
-        }
-
-        if (object !== undefined) {
-            if (dotPieces[0] === '') {
-                return checkWrapArray(fullName, object);
-            }
-
-            return get.call(this, rest, eval('object.' + dotPieces[0]), fullName);
-        }
-        if (dotPieces.length === 1) {
-            if (typeof attrs[name] === 'function') {
-                return attrs[name].call(this);
-            }
-
-            return checkWrapArray(name, attrs[name]);
-        }
-
-        var thisObject = typeof attrs[dotPieces[0]] === 'function'
-            ? attrs[dotPieces[0]].call(this)
-            : attrs[dotPieces[0]];
-
-        return get.call(this, rest, thisObject, fullName);
+        return intRegex.test(capture)
+            ? parseInt(capture)
+            : attrs[capture];
     };
 
     return {
