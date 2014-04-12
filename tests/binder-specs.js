@@ -5,6 +5,7 @@ describe('binder', function() {
         model = new DataBind.Model("scope");
         model.attr('prop', 'myValue');
         model.attr('check', true);
+        model.attr('items', [0, 1]);
 
         documentStub = sinon.stub({querySelector: function() {}});
         scopeElement = sinon.stub({querySelectorAll: function() {}});
@@ -15,6 +16,57 @@ describe('binder', function() {
         scopeElement.querySelectorAll.withArgs('[data-foreach]').returns([]);
         documentStub.querySelector.withArgs('[data-scope=scope]').returns(scopeElement);
         binder = new DataBind.Binder(model, documentStub);
+    });
+
+    describe('foreach', function() {
+        var foreachNode;
+        var childNode;
+        var templateNode;
+        var cloneNode;
+
+        beforeEach(function() {
+
+            cloneNode = sinon.stub({hasAttribute: function() {}, getAttribute: function() {}, setAttribute: function() {}, children: []});
+            cloneNode.hasAttribute.withArgs('data-bind').returns(true);
+            cloneNode.getAttribute.withArgs('data-bind').returns('item');
+
+            cloneNode.hasAttribute.withArgs('data-class').returns(true);
+            cloneNode.getAttribute.withArgs('data-class').returns('item');
+
+            templateNode = sinon.stub({cloneNode: function() { }});
+            templateNode.cloneNode.withArgs(true).returns(cloneNode);
+
+            childNode = sinon.stub({cloneNode: function() { }, getAttribute: function() { }});
+            childNode.cloneNode.withArgs(true).returns(templateNode);
+
+            foreachNode = sinon.stub({getAttribute: function() {}, children: [childNode], appendChild: function() {}, removeChild: function() {}});
+            foreachNode.getAttribute.withArgs('data-foreach').returns('item in items');
+
+            scopeElement.querySelectorAll.withArgs('[data-foreach]').returns([foreachNode]);
+        });
+
+//        it('should clear children', function() {
+//            expect(foreachNode.removeChild.calledTwice).toBeTruthy();
+//        });
+
+        it('should append a clone node for each item in collection', function() {
+            binder.bind();
+
+            expect(foreachNode.appendChild.calledWith(cloneNode)).toBeTruthy();
+            expect(foreachNode.appendChild.calledTwice).toBeTruthy();
+        });
+
+        it('should convert item name to index expression', function() {
+            binder.bind();
+
+            expect(cloneNode.setAttribute.calledWith('data-bind', 'items[0]')).toBeTruthy();
+            expect(cloneNode.setAttribute.calledWith('data-bind', 'items[1]')).toBeTruthy();
+
+            expect(cloneNode.setAttribute.calledWith('data-class', 'items[0]')).toBeTruthy();
+            expect(cloneNode.setAttribute.calledWith('data-class', 'items[1]')).toBeTruthy();
+
+            //todo: test that children get converted, too
+        });
     });
 
     describe('bind', function() {

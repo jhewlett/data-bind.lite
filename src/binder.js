@@ -6,7 +6,6 @@ DataBind.Binder = function(model, document) {
     var doc = document || window.document;
     var scopeElement = doc.querySelector('[data-scope=' + model.scope + ']');
     var currentValue = {};
-    //var templates = [];
     var foreach = [];
 
     model.setValueChanged(valueChangedHandler);
@@ -17,10 +16,6 @@ DataBind.Binder = function(model, document) {
 
         bindElementsInForeach(foreachElements);
 
-        //var templateElements = scopeElement.querySelectorAll('[data-template]');
-        //captureTemplates(templateElements);
-        //bindTemplates(templateElements);
-
         var valueElements = scopeElement.querySelectorAll('[data-bind="' + name + '"]');
         bindValues(valueElements);
 
@@ -30,9 +25,6 @@ DataBind.Binder = function(model, document) {
 
     var bindElementsInForeach = function(elements) {
         for (var i = 0; i < elements.length; i++) {
-            //var templateElements = elements[i].querySelectorAll('[data-template]');
-            //captureTemplates(templateElements);
-            //bindTemplates(templateElements);
 
             var valueElements = elements[i].querySelectorAll('[data-bind]');
             bindValues(valueElements);
@@ -44,22 +36,6 @@ DataBind.Binder = function(model, document) {
             bindClicks(clickElements);
         }
     };
-
-//    var bindTemplates = function(elements) {
-//        for (var i = 0; i < elements.length; i++) {
-//            var regEx = /{{([^}]+)}}/g;
-//
-//            elements[i].innerHTML = templates[i].replace(regEx, fillValue);
-//        }
-//    };
-
-//    var fillValue = function(match, group1) {
-//        var value = model.get(group1);
-//
-//        return value !== undefined
-//            ? value
-//            : '';
-//    };
 
     var bindClasses = function(elements) {
         for (var i = 0; i < elements.length; i++) {
@@ -87,10 +63,6 @@ DataBind.Binder = function(model, document) {
         var foreachElements = scopeElement.querySelectorAll('[data-foreach]');
         captureForeach(foreachElements);
         bindForeach(foreachElements);
-
-        //var templateElements = scopeElement.querySelectorAll('[data-template]');
-        //captureTemplates(templateElements);
-        //bindTemplates(templateElements);
 
         var valueElements = scopeElement.querySelectorAll('[data-bind]');
         bindValues(valueElements);
@@ -124,7 +96,8 @@ DataBind.Binder = function(model, document) {
 
     var bindForeach = function(elements) {
         for (var i = 0; i < elements.length; i++) {
-            elements[i].innerHTML = '';     //todo: make faster
+
+            clearChildren(elements[i]);
 
             var value = model.get(foreach[i].items);
             for (var j = 0; j < value.length(); j++) {
@@ -134,32 +107,22 @@ DataBind.Binder = function(model, document) {
 
                     convertBinding(clone, 'data-bind', foreach[i], j);
                     convertBinding(clone, 'data-class', foreach[i], j);
-                    convertBinding(clone, 'data-click', foreach[i], j);
-                    //convertTemplateBinding(clone, foreach[i], j);
+                    //convertBinding(clone, 'data-click', foreach[i], j);
                 }
             }
         }
     };
 
-//    var convertTemplateBinding = function (element, template, index) {
-//        if (element.hasAttribute('data-template')) {
-//            var regEx = /{{[^}]+}}/g;
-//
-//            var foreachReplace = function (match) {
-//                return match.replace(template.item, template.items + '[' + index + ']')
-//            };
-//
-//            element.innerHTML = element.innerHTML.replace(regEx, foreachReplace);
-//        }
-//
-//        for(var i = 0; i < element.children.length; i++) {
-//            convertTemplateBinding(element.children[i], template, index);
-//        }
-//    };
+    var clearChildren = function(element) {
+        while (element.lastChild) {
+            element.removeChild(element.lastChild);
+        }
+    };
 
     var convertBinding = function(element, attribute, template, index) {
         if (element.hasAttribute(attribute)) {
-            element.setAttribute(attribute, element.getAttribute(attribute).replace(template.item, template.items + '[' + index + ']'))
+            var newAttribute = element.getAttribute(attribute).replace(template.item, template.items + '[' + index + ']');
+            element.setAttribute(attribute, newAttribute);
         }
 
         for (var i = 0; i < element.children.length; i++) {
@@ -167,18 +130,12 @@ DataBind.Binder = function(model, document) {
         }
     };
 
-//    var captureTemplates = function(elements) {
-//        for(var i = 0; i < elements.length; i++) {
-//            templates[i] = elements[i].innerHTML;
-//        }
-//    };
-
     var bindClick = function(element) {
         var expression = element.getAttribute('data-click');
 
         element.onclick = function() {
             eval('model.' + expression);
-        }
+        };
     };
 
     var bindValues = function(elements) {
