@@ -9,7 +9,7 @@
         <!--<button data-click="add()">Add item</button>-->
         <!--<br>-->
         <ul data-foreach="item in items">
-            <li data-bind="item"></li>
+            <li data-class="getClass(item)" data-bind="item"></li>
         </ul>
 
         <input data-bind="items[0]" type="text">

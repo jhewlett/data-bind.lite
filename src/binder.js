@@ -120,8 +120,15 @@ DataBind.Binder = function(model, document) {
     };
 
     var convertBinding = function(element, attribute, template, index) {
+        var replace = function(match) {
+            return match.replace(template.item, template.items + '[' + index + ']')
+        };
+
         if (element.hasAttribute(attribute)) {
-            var newAttribute = element.getAttribute(attribute).replace(template.item, template.items + '[' + index + ']');
+            var newAttribute = element.getAttribute(attribute)
+                .replace(new RegExp('^' + template.item + '$'), template.items + '[' + index + ']')
+                .replace(new RegExp('[(,] *' + template.item + ' *(?=[,)])', 'g'), replace);
+
             element.setAttribute(attribute, newAttribute);
         }
 

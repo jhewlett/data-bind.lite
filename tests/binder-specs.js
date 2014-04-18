@@ -24,14 +24,13 @@ describe('binder', function() {
         var templateNode;
         var cloneNode;
 
-        beforeEach(function() {
-
+        var setup = function(expression) {
             cloneNode = sinon.stub({hasAttribute: function() {}, getAttribute: function() {}, setAttribute: function() {}, children: []});
             cloneNode.hasAttribute.withArgs('data-bind').returns(true);
-            cloneNode.getAttribute.withArgs('data-bind').returns('item');
+            cloneNode.getAttribute.withArgs('data-bind').returns(expression);
 
             cloneNode.hasAttribute.withArgs('data-class').returns(true);
-            cloneNode.getAttribute.withArgs('data-class').returns('item');
+            cloneNode.getAttribute.withArgs('data-class').returns(expression);
 
             templateNode = sinon.stub({cloneNode: function() { }});
             templateNode.cloneNode.withArgs(true).returns(cloneNode);
@@ -43,30 +42,60 @@ describe('binder', function() {
             foreachNode.getAttribute.withArgs('data-foreach').returns('item in items');
 
             scopeElement.querySelectorAll.withArgs('[data-foreach]').returns([foreachNode]);
+        };
+
+        describe('simple binding', function() {
+            beforeEach(function() {
+                setup('item');
+                binder.bind();
+            });
+
+            it('should append a clone node for each item in collection', function() {
+                expect(foreachNode.appendChild.calledWith(cloneNode)).toBeTruthy();
+                expect(foreachNode.appendChild.calledTwice).toBeTruthy();
+            });
+
+            it('should convert item name to index expression', function() {
+                expect(cloneNode.setAttribute.calledWith('data-bind', 'items[0]')).toBeTruthy();
+                expect(cloneNode.setAttribute.calledWith('data-bind', 'items[1]')).toBeTruthy();
+
+                expect(cloneNode.setAttribute.calledWith('data-class', 'items[0]')).toBeTruthy();
+                expect(cloneNode.setAttribute.calledWith('data-class', 'items[1]')).toBeTruthy();
+
+                //todo: test that children get converted, too
+            });
         });
+
+        describe('substring match in binding expression', function() {
+            beforeEach(function() {
+                setup('itemization');
+                binder.bind();
+            });
+
+            it('should not replace', function() {
+                expect(cloneNode.setAttribute.calledWith('data-class', 'itemization')).toBeTruthy();
+                expect(cloneNode.setAttribute.calledWith('data-bind', 'itemization')).toBeTruthy();
+            });
+        });
+
+        describe('match in method parameters', function() {
+            beforeEach(function() {
+                setup('method(item, item, item)');
+                binder.bind();
+            });
+
+            it('should replace', function() {
+                expect(cloneNode.setAttribute.calledWith('data-class', 'method(items[0], items[0], items[0])')).toBeTruthy();
+            });
+        });
+
+
 
 //        it('should clear children', function() {
 //            expect(foreachNode.removeChild.calledTwice).toBeTruthy();
 //        });
 
-        it('should append a clone node for each item in collection', function() {
-            binder.bind();
 
-            expect(foreachNode.appendChild.calledWith(cloneNode)).toBeTruthy();
-            expect(foreachNode.appendChild.calledTwice).toBeTruthy();
-        });
-
-        it('should convert item name to index expression', function() {
-            binder.bind();
-
-            expect(cloneNode.setAttribute.calledWith('data-bind', 'items[0]')).toBeTruthy();
-            expect(cloneNode.setAttribute.calledWith('data-bind', 'items[1]')).toBeTruthy();
-
-            expect(cloneNode.setAttribute.calledWith('data-class', 'items[0]')).toBeTruthy();
-            expect(cloneNode.setAttribute.calledWith('data-class', 'items[1]')).toBeTruthy();
-
-            //todo: test that children get converted, too
-        });
     });
 
     describe('bind', function() {

@@ -13,6 +13,10 @@ model.computed('sentence', function() {
     return this.get("fullName") + ' went to the store';
 });
 
+model.computed('getClass', function(item) {
+    return item.class;
+});
+
 model.attr('items', ['joe', 'john', 'my']);
 
 model.add = function() {
