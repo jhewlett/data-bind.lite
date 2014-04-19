@@ -54,8 +54,23 @@ DataBind.Model = function(scope) {
     var get = function(name, object, fullName) {
         fullName = fullName || name;
 
-        var dotPieces = name.split('.')
+        var dotPieces = name.split('.');
         var rest = dotPieces.slice(1, dotPieces.length).join('.');
+
+        var argsRegex = /[(][^)]+[)]/;
+        var match = argsRegex.exec(dotPieces[0]);
+        var args = [];
+        if (match !== null) {
+            dotPieces[0] = dotPieces[0].substring(0, match.index);
+
+            match[0] = match[0].replace('(', '').replace(')', '');
+
+            var split = match[0].split(',');
+
+            split.forEach(function(piece) {
+                args.push(get.call(this, piece.trim()));
+            });
+        }
 
         var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
 
@@ -77,16 +92,17 @@ DataBind.Model = function(scope) {
 
             return get.call(this, rest, eval('object.' + dotPieces[0]), fullName);
         }
+
         if (dotPieces.length === 1) {
-            if (typeof attrs[name] === 'function') {
-                return attrs[name].call(this);
+            if (typeof attrs[dotPieces[0]] === 'function') {
+                return attrs[dotPieces[0]].apply(this, args);
             }
 
             return checkWrapArray(name, attrs[name]);
         }
 
         var thisObject = typeof attrs[dotPieces[0]] === 'function'
-            ? attrs[dotPieces[0]].call(this)
+            ? attrs[dotPieces[0]].apply(this, args)
             : attrs[dotPieces[0]];
 
         return get.call(this, rest, thisObject, fullName);

@@ -126,7 +126,7 @@ DataBind.Binder = function(model, document) {
 
         if (element.hasAttribute(attribute)) {
             var newAttribute = element.getAttribute(attribute)
-                .replace(new RegExp('^' + template.item + '$'), template.items + '[' + index + ']')
+                .replace(new RegExp('^' + template.item + '(?=[.]|$)'), template.items + '[' + index + ']')
                 .replace(new RegExp('[(,] *' + template.item + ' *(?=[,)])', 'g'), replace);
 
             element.setAttribute(attribute, newAttribute);

@@ -89,7 +89,16 @@ describe('binder', function() {
             });
         });
 
+        describe('match with object', function() {
+            beforeEach(function() {
+                setup('item.prop');
+                binder.bind();
+            });
 
+            it('should replace', function() {
+                expect(cloneNode.setAttribute.calledWith('data-bind', 'items[0].prop')).toBeTruthy();
+            });
+        });
 
 //        it('should clear children', function() {
 //            expect(foreachNode.removeChild.calledTwice).toBeTruthy();

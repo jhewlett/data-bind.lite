@@ -8,11 +8,12 @@
     <div data-scope="one">
         <!--<button data-click="add()">Add item</button>-->
         <!--<br>-->
-        <ul data-foreach="item in items">
-            <li data-class="getClass(item)" data-bind="item"></li>
+        <!--<ul data-foreach="item in items">-->
+        <ul>
+            <li data-class="getClass(items[0])" data-bind="items[0].name"></li>
         </ul>
 
-        <input data-bind="items[0]" type="text">
+        <input data-bind="items[0].name" type="text">
 
         <!--<div data-bind="items[0].firstName"></div>-->
 

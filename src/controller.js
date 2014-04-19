@@ -9,19 +9,16 @@ model.attr('lastName', 'Hewlett');
 model.computed('fullName', function() {
     return this.get('firstName') + ' ' + this.get('lastName');
 });
+
 model.computed('sentence', function() {
     return this.get("fullName") + ' went to the store';
 });
 
 model.computed('getClass', function(item) {
-    return item.class;
+    return item.name;
 });
 
-model.attr('items', ['joe', 'john', 'my']);
-
-model.add = function() {
-    this.get('items').push({firstName: 'john', color: 'four'});
-};
+model.attr('items', [{color: 'four', name: 'joe'}, {color: 'three', name: 'john'}]);
 
 var binder = new DataBind.Binder(model);
 binder.bind();
