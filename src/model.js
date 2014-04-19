@@ -110,6 +110,14 @@ DataBind.Model = function(scope) {
 
     var fireValueChangedForAllDependencies = function(name) {
         valueChanged(name);
+
+        if (name.indexOf('.') >= 0) {
+            var pieces = name.split('.');
+            var parent = pieces.slice(0, pieces.length - 1).join('.');
+
+            fireValueChangedForAllDependencies(parent);
+        }
+
         if (dependsOn.hasOwnProperty(name)) {
             for(var i = 0; i < dependsOn[name].length; i++) {
                 fireValueChangedForAllDependencies(dependsOn[name][i]);
@@ -118,7 +126,7 @@ DataBind.Model = function(scope) {
     };
 
     var computed = function(name, func) {
-        var regEx = /this\.get\(['"](\w+)['"]\)/g;
+        var regEx = /this\.get\(['"]([^'"]+)['"]\)/g;
 
         var match = regEx.exec(func.toString());
         while (match != null) {

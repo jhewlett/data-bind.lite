@@ -12,7 +12,7 @@ describe('model', function() {
     describe('calling attr with array index', function() {
         var valueChanged;
         beforeEach(function() {
-            valueChanged = sinon.stub();
+            valueChanged = sinon.spy();
             model.setValueChanged(valueChanged);
             model.attr('items', [0]);
         });
@@ -27,7 +27,7 @@ describe('model', function() {
     describe('pushing to array', function() {
         var valueChanged;
         beforeEach(function() {
-            valueChanged = sinon.stub();
+            valueChanged = sinon.spy();
             model.setValueChanged(valueChanged);
             model.attr('arr', [0]);
             model.get('arr').push(1);
@@ -46,14 +46,20 @@ describe('model', function() {
     describe('pushing to inner array', function() {
         var valueChanged;
         beforeEach(function() {
-            valueChanged = sinon.stub();
+            valueChanged = sinon.spy();
             model.setValueChanged(valueChanged);
             model.attr('arr', {inner: [1]});
+            valueChanged.reset()
+
             model.get('arr.inner').push(2);
         });
 
         it('should call value changed', function() {
             expect(valueChanged.calledWith('arr.inner')).toBeTruthy();
+        });
+
+        it('should call value changed for parent object', function() {
+            expect(valueChanged.calledWith('arr')).toBeTruthy();
         });
 
         it('should push to array', function() {
@@ -64,7 +70,7 @@ describe('model', function() {
     describe('calling attr with dot property syntax', function() {
         var valueChanged;
         beforeEach(function() {
-            valueChanged = sinon.stub();
+            valueChanged = sinon.spy();
             model.setValueChanged(valueChanged);
             model.attr('object', {firstName: ''});
         });
@@ -79,7 +85,7 @@ describe('model', function() {
     describe('calling attr with multiple layers of dot property syntax and array indexing', function() {
         var valueChanged;
         beforeEach(function() {
-            valueChanged = sinon.stub();
+            valueChanged = sinon.spy();
             model.setValueChanged(valueChanged);
             model.attr('object', {items: [{firstName: ''}]});
         });
@@ -128,7 +134,7 @@ describe('model', function() {
         var valueChanged;
         beforeEach(function() {
             model.attr('a', 1);
-            valueChanged = sinon.stub();
+            valueChanged = sinon.spy();
             model.setValueChanged(valueChanged);
             model.computed('b', function() {
                 return this.get('a');
