@@ -13,12 +13,13 @@ describe('model', function() {
         var valueChanged;
         beforeEach(function() {
             valueChanged = sinon.spy();
-            model.setValueChanged(valueChanged);
             model.attr('items', [0]);
+            model.setValueChanged(valueChanged);
         });
 
         it('should update value in array', function() {
             model.attr('items[0]', 5);
+
             expect(model.get('items[0]')).toEqual(5);
             expect(valueChanged.calledWith('items[0]')).toBeTruthy();
         });
@@ -28,8 +29,9 @@ describe('model', function() {
         var valueChanged;
         beforeEach(function() {
             valueChanged = sinon.spy();
-            model.setValueChanged(valueChanged);
             model.attr('arr', [0]);
+            model.setValueChanged(valueChanged);
+
             model.get('arr').push(1);
         });
 
@@ -47,19 +49,14 @@ describe('model', function() {
         var valueChanged;
         beforeEach(function() {
             valueChanged = sinon.spy();
-            model.setValueChanged(valueChanged);
             model.attr('arr', {inner: [1]});
-            valueChanged.reset()
+            model.setValueChanged(valueChanged);
 
             model.get('arr.inner').push(2);
         });
 
         it('should call value changed', function() {
             expect(valueChanged.calledWith('arr.inner')).toBeTruthy();
-        });
-
-        it('should call value changed for parent object', function() {
-            expect(valueChanged.calledWith('arr')).toBeTruthy();
         });
 
         it('should push to array', function() {
@@ -69,14 +66,16 @@ describe('model', function() {
 
     describe('calling attr with dot property syntax', function() {
         var valueChanged;
+
         beforeEach(function() {
             valueChanged = sinon.spy();
-            model.setValueChanged(valueChanged);
             model.attr('object', {firstName: ''});
+            model.setValueChanged(valueChanged);
         });
 
         it('should update property on object', function() {
             model.attr('object.firstName', 'john');
+
             expect(model.get('object.firstName')).toEqual('john');
             expect(valueChanged.calledWith('object.firstName')).toBeTruthy();
         });
@@ -86,12 +85,13 @@ describe('model', function() {
         var valueChanged;
         beforeEach(function() {
             valueChanged = sinon.spy();
-            model.setValueChanged(valueChanged);
             model.attr('object', {items: [{firstName: ''}]});
+            model.setValueChanged(valueChanged);
         });
 
         it('should update property on object', function() {
             model.attr('object.items[0].firstName', 'john');
+
             expect(model.get('object.items[0].firstName')).toEqual('john');
             expect(valueChanged.calledWith('object.items[0].firstName')).toBeTruthy();
         });
@@ -99,33 +99,39 @@ describe('model', function() {
 
     describe('getting object graph', function() {
         it('should dig into object', function() {
-            model.attr('object', {prop: 'value'})
+            model.attr('object', {prop: 'value'});
+
             expect(model.get('object.prop')).toEqual('value');
         });
 
         it('should dig into object graph two levels deep', function() {
             model.attr('object', {prop: {prop2: 'value'}});
+
             expect(model.get('object.prop.prop2')).toEqual('value');
         });
 
         it('should handle computed property in object graph', function() {
             model.computed('computed', function() {return {computedProp: 4}});
+
             expect(model.get('computed.computedProp')).toEqual(4);
         });
 
         it('should handle array access at beginning', function() {
             model.attr('items', [{number: 0}, {number: 1}]);
+
             expect(model.get('items[1].number')).toEqual(1);
         });
 
         it('should handle array access in middle', function() {
             model.attr('object', {arr: [{number: 0}, {number: 1}]});
+
             expect(model.get('object.arr[0].number')).toEqual(0);
         });
 
         it('should handle variable array access at beginning', function() {
             model.attr('index', 1);
             model.attr('items', [0, 1]);
+
             expect(model.get('items[index]')).toEqual(1);
         });
     });
@@ -135,13 +141,14 @@ describe('model', function() {
         beforeEach(function() {
             model.attr('a', 1);
             valueChanged = sinon.spy();
-            model.setValueChanged(valueChanged);
             model.computed('b', function() {
                 return this.get('a');
             });
             model.computed('c', function() {
                 return this.get("b");
             });
+
+            model.setValueChanged(valueChanged);
 
             model.attr('a', 2);
         });
@@ -159,6 +166,82 @@ describe('model', function() {
             expect(model.get('c')).toEqual(2);
         });
     });
+
+    describe('modifying property on array item', function() {
+        var valueChanged;
+
+        beforeEach(function() {
+            model.attr('items', [{completed: false}]);
+
+            valueChanged = sinon.spy();
+            model.setValueChanged(valueChanged);
+
+            model.attr('items[0].completed', true);
+        });
+
+        it('should trigger value changed for array', function() {
+            expect(valueChanged.calledWith('items')).toBeTruthy();
+        })
+    });
+
+    describe('modifying property on array item', function() {
+        var valueChanged;
+
+        beforeEach(function() {
+            model.attr('items', [{subItems: [{completed: false}]}]);
+
+            valueChanged = sinon.spy();
+            model.setValueChanged(valueChanged);
+
+            model.attr('items[0].subItems[0].completed', true);
+        });
+
+        it('should trigger value changed for outer collection', function() {
+            expect(valueChanged.calledWith('items')).toBeTruthy();
+        });
+
+        it('should trigger value changed for inner collection', function() {
+            expect(valueChanged.calledWith('subItems')).toBeTruthy();
+        });
+    });
+
+    describe('modifying property on array item', function() {
+        var valueChanged;
+
+        beforeEach(function() {
+            model.attr('items', [0]);
+
+            valueChanged = sinon.spy();
+            model.setValueChanged(valueChanged);
+
+            model.attr('items[0]', 1);
+        });
+
+        it('should trigger value changed for collection', function() {
+            expect(valueChanged.calledWith('items')).toBeTruthy();
+        });
+    });
+
+//    describe('computed property with explicit dependency', function() {
+//        var valueChanged;
+//
+//        beforeEach(function() {
+//            valueChanged = sinon.spy();
+//
+//            model.attr('items', [0]);
+//            model.computed('prop', function() {
+//                return this.get('items[0]');
+//            }, ['items']);
+//
+//            model.setValueChanged(valueChanged);
+//
+//            model.get('items').push(1);
+//        });
+//
+//        it('adding to items should trigger value changed for computed property', function() {
+//            expect(valueChanged.calledWith('prop')).toBeTruthy();
+//        });
+//    });
 
     describe('computed property with a parameter', function() {
         var methodSpy;
