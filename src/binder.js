@@ -21,6 +21,9 @@ DataBind.Binder = function(model, document) {
 
         var classElements = scopeElement.querySelectorAll('[data-class="' + name + '"]');
         bindClasses(classElements);
+
+        var computedClassElements = scopeElement.querySelectorAll('[data-class^="' + name + '("]');
+        bindClasses(computedClassElements);
     }
 
     var bindElementsInForeach = function(elements) {

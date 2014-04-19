@@ -37,7 +37,6 @@ describe('model', function() {
 
         it('should call value changed', function() {
             expect(valueChanged.calledWith('arr')).toBeTruthy();
-            expect(valueChanged.calledTwice).toBeTruthy();
         });
 
         it('should push to array', function() {
@@ -222,26 +221,26 @@ describe('model', function() {
         });
     });
 
-//    describe('computed property with explicit dependency', function() {
-//        var valueChanged;
-//
-//        beforeEach(function() {
-//            valueChanged = sinon.spy();
-//
-//            model.attr('items', [0]);
-//            model.computed('prop', function() {
-//                return this.get('items[0]');
-//            }, ['items']);
-//
-//            model.setValueChanged(valueChanged);
-//
-//            model.get('items').push(1);
-//        });
-//
-//        it('adding to items should trigger value changed for computed property', function() {
-//            expect(valueChanged.calledWith('prop')).toBeTruthy();
-//        });
-//    });
+    describe('computed property with explicit dependency', function() {
+        var valueChanged;
+
+        beforeEach(function() {
+            valueChanged = sinon.spy();
+
+            model.attr('items', [0]);
+            model.computed('prop', function() {
+                return this.get('items[0]');
+            }, ['items']);
+
+            model.setValueChanged(valueChanged);
+
+            model.get('items').push(1);
+        });
+
+        it('adding to items should trigger value changed for computed property', function() {
+            expect(valueChanged.calledWith('prop')).toBeTruthy();
+        });
+    });
 
     describe('computed property with a parameter', function() {
         var methodSpy;

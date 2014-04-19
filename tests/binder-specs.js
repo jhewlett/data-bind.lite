@@ -6,8 +6,11 @@ describe('binder', function() {
         model.attr('prop', 'myValue');
         model.attr('check', true);
         model.attr('items', [0, 1]);
+        model.attr('trigger', 'off');
+        model.computed('computed', function(arg) {return this.get('trigger');});
 
         documentStub = sinon.stub({querySelector: function() {}});
+
         scopeElement = sinon.stub({querySelectorAll: function() {}});
         scopeElement.querySelectorAll.withArgs('[data-bind]').returns([]);
         scopeElement.querySelectorAll.withArgs('[data-click]').returns([]);
@@ -15,6 +18,7 @@ describe('binder', function() {
         scopeElement.querySelectorAll.withArgs('[data-template]').returns([]);
         scopeElement.querySelectorAll.withArgs('[data-foreach]').returns([]);
         documentStub.querySelector.withArgs('[data-scope=scope]').returns(scopeElement);
+
         binder = new DataBind.Binder(model, documentStub);
     });
 
@@ -103,12 +107,10 @@ describe('binder', function() {
 //        it('should clear children', function() {
 //            expect(foreachNode.removeChild.calledTwice).toBeTruthy();
 //        });
-
-
     });
 
     describe('bind', function() {
-        describe('classes', function() {
+        describe('data-class with no parameters', function() {
             var classList;
             beforeEach(function() {
                 classList = sinon.stub({add: function() {}, remove: function() {}});
@@ -127,6 +129,7 @@ describe('binder', function() {
             describe('when the value changes to a new value', function() {
                 beforeEach(function() {
                     scopeElement.querySelectorAll.withArgs('[data-class="prop"]').returns([element]);
+                    scopeElement.querySelectorAll.withArgs('[data-class^="prop("]').returns([]);
                     scopeElement.querySelectorAll.withArgs('[data-bind="prop"]').returns([]);
                 });
 
@@ -140,45 +143,30 @@ describe('binder', function() {
             });
         });
 
-//        describe('templates', function() {
-//            var template;
-//
-//            describe('with invalid attribute name', function() {
-//                beforeEach(function() {
-//                    template = {innerHTML: 'Hello {{invalid}}'};
-//                    scopeElement.querySelectorAll.withArgs('[data-template]').returns([template]);
-//                    binder.bind();
-//                });
-//
-//                it('should replace with empty string', function() {
-//                    expect(template.innerHTML).toEqual('Hello ');
-//                });
-//            });
-//
-//            describe('with valid attribute name', function() {
-//                beforeEach(function() {
-//                    template = {innerHTML: 'Hello {{prop}}'};
-//                    scopeElement.querySelectorAll.withArgs('[data-template]').returns([template]);
-//                    binder.bind();
-//                });
-//
-//                it('should replace html', function() {
-//                    expect(template.innerHTML).toEqual('Hello myValue');
-//                });
-//
-//                describe('changing the value again', function() {
-//                    beforeEach(function() {
-//                        scopeElement.querySelectorAll.withArgs('[data-class=prop]').returns([]);
-//                        scopeElement.querySelectorAll.withArgs('[data-bind=prop]').returns([]);
-//                    });
-//
-//                    it('should replace html with new value', function() {
-//                        model.attr('prop', 'newValue');
-//                        expect(template.innerHTML).toEqual('Hello newValue');
-//                    });
-//                });
-//            });
-//        });
+        describe('when data-class with parameters changes to a new value', function() {
+            var classList;
+
+            beforeEach(function() {
+                classList = sinon.stub({add: function() {}, remove: function() {}});
+                element = sinon.stub({getAttribute: function() {}, classList: classList});
+                element.getAttribute.withArgs('data-class').returns('computed(myArg)');
+
+                scopeElement.querySelectorAll.withArgs('[data-class="trigger"]').returns([]);
+                scopeElement.querySelectorAll.withArgs('[data-class^="trigger("]').returns([]);
+                scopeElement.querySelectorAll.withArgs('[data-bind="trigger"]').returns([]);
+
+                scopeElement.querySelectorAll.withArgs('[data-class="computed"]').returns([]);
+                scopeElement.querySelectorAll.withArgs('[data-class^="computed("]').returns([element]);
+                scopeElement.querySelectorAll.withArgs('[data-bind="computed"]').returns([]);
+            });
+
+            it('should update the class', function() {
+                binder.bind();
+                model.attr('trigger', 'on');
+
+                expect(classList.add.calledWith('on')).toBeTruthy();
+            });
+        });
 
         describe('text input', function() {
             beforeEach(function() {

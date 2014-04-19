@@ -16,7 +16,7 @@ model.computed('sentence', function() {
 
 model.computed('getClass', function(item) {
     return item.name;
-});
+}, ['items']);
 
 model.attr('items', [{color: 'four', name: 'joe'}, {color: 'three', name: 'john'}]);
 
