@@ -11,10 +11,24 @@ DataBind.Collection = function(name, arr, valueChangedCallback) {
         valueChangedCallback(name);
     };
 
+    var forEach = function(callback) {
+        arr.forEach(function(item) {
+            callback(item);
+        });
+        valueChangedCallback(name);
+    };
+
+    var clear = function() {
+        arr.length = 0;
+        valueChangedCallback(name);
+    };
+
     return {
         push: push,
         pop: pop,
         value: arr,
-        length: function() { return arr.length; }
+        length: function() { return arr.length; },
+        forEach: forEach,
+        clear: clear
     };
 };
