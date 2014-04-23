@@ -132,8 +132,12 @@ DataBind.Model = function(scope) {
         }
     };
 
-    var computed = function(name, func, otherDependencies) {
-        otherDependencies = otherDependencies || [];
+    var computed = function(name, func, explicitDependencies) {
+        if (explicitDependencies) {
+            explicitDependencies.forEach(function (dependency) {
+                addDependency(name, dependency);
+            });
+        }
 
         var regEx = /this\.get\(['"]([^'"]+)['"]\)/g;
 
@@ -143,9 +147,6 @@ DataBind.Model = function(scope) {
             match = regEx.exec(func.toString());
         }
 
-        otherDependencies.forEach(function(dependency) {
-            addDependency(name, dependency);
-        });
         attrs[name] = func;
     };
 

@@ -18,6 +18,10 @@ model.computed('getClass', function(item) {
     return item.name;
 }, ['items']);
 
+model.alert = function() {
+    alert('enter pressed!');
+};
+
 model.attr('items', [{color: 'four', name: 'joe'}, {color: 'three', name: 'john'}]);
 
 var binder = new DataBind.Binder(model);

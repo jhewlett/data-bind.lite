@@ -17,6 +17,7 @@ describe('binder', function() {
         scopeElement.querySelectorAll.withArgs('[data-class]').returns([]);
         scopeElement.querySelectorAll.withArgs('[data-template]').returns([]);
         scopeElement.querySelectorAll.withArgs('[data-foreach]').returns([]);
+        scopeElement.querySelectorAll.withArgs('[data-enter]').returns([]);
         documentStub.querySelector.withArgs('[data-scope=scope]').returns(scopeElement);
 
         binder = new DataBind.Binder(model, documentStub);

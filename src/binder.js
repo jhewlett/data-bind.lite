@@ -37,6 +37,9 @@ DataBind.Binder = function(model, document) {
 
             var clickElements = elements[i].querySelectorAll('[data-click]');
             bindClicks(clickElements);
+
+            var enterElements = scopeElement.querySelectorAll('[data-enter]');
+            bindEnters(enterElements);
         }
     };
 
@@ -75,6 +78,25 @@ DataBind.Binder = function(model, document) {
 
         var clickElements = scopeElement.querySelectorAll('[data-click]');
         bindClicks(clickElements);
+
+        var enterElements = scopeElement.querySelectorAll('[data-enter]');
+        bindEnters(enterElements);
+    };
+
+    var bindEnters = function(elements) {
+        for (var i = 0; i < elements.length; i++) {
+            bindEnter(elements[i]);
+        }
+    };
+
+    var bindEnter = function(element) {
+        var expression = element.getAttribute('data-enter');
+
+        element.onkeydown = function(event) {
+            if (event.which === 13) {
+                eval('model.' + expression);
+            }
+        };
     };
 
     var bindClicks = function(elements) {
