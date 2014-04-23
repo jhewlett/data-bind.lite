@@ -152,13 +152,8 @@ describe('binder', function() {
                 element = sinon.stub({getAttribute: function() {}, classList: classList});
                 element.getAttribute.withArgs('data-class').returns('computed(myArg)');
 
-                scopeElement.querySelectorAll.withArgs('[data-class="trigger"]').returns([]);
-                scopeElement.querySelectorAll.withArgs('[data-class^="trigger("]').returns([]);
-                scopeElement.querySelectorAll.withArgs('[data-bind="trigger"]').returns([]);
-
-                scopeElement.querySelectorAll.withArgs('[data-class="computed"]').returns([]);
+                scopeElement.querySelectorAll.returns([]);
                 scopeElement.querySelectorAll.withArgs('[data-class^="computed("]').returns([element]);
-                scopeElement.querySelectorAll.withArgs('[data-bind="computed"]').returns([]);
             });
 
             it('should update the class', function() {
@@ -247,6 +242,21 @@ describe('binder', function() {
             it('should set innerHTML', function() {
                 binder.bind();
                 expect(element.innerHTML).toEqual('myValue');
+            });
+        });
+
+        describe('binding a non-existent value', function() {
+            beforeEach(function() {
+                element = sinon.stub({getAttribute: function() {}, tagName: ''});
+                element.getAttribute.withArgs('data-bind').returns('object');
+                scopeElement.querySelectorAll.returns([]);
+                scopeElement.querySelectorAll.withArgs('[data-bind]').returns([element]);
+            });
+
+            it('should create attribute and initialize to empty string', function() {
+                binder.bind();
+
+                expect(model.get('object')).toEqual('');
             });
         });
     });

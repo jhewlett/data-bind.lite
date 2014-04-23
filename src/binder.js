@@ -181,35 +181,35 @@ DataBind.Binder = function(model, document) {
 
         var modelValue = model.get(name);
 
-        if (modelValue !== undefined) {
-            if (element.type === 'checkbox') {
-                element.checked = modelValue;
-                element.onclick = function() {
-                    model.attr(name, element.checked);
-                };
-            }
-            else if (element.type === 'radio') {
-                element.checked = modelValue === element.value;
-                element.onclick = function() {
-                    model.attr(name, element.value);
-                };
-            }
-            else if (element.tagName.toLowerCase() === 'select') {
+        if (modelValue === undefined) {
+            model.attr(name, "");
+        } else if (element.type === 'checkbox') {
+            element.checked = modelValue;
+            element.onclick = function() {
+                model.attr(name, element.checked);
+            };
+        }
+        else if (element.type === 'radio') {
+            element.checked = modelValue === element.value;
+            element.onclick = function() {
+                model.attr(name, element.value);
+            };
+        }
+        else if (element.tagName.toLowerCase() === 'select') {
+            element.value = modelValue;
+            element.onchange = function() {
+                model.attr(name, element.value);
+            };
+        }
+        else if (element.type ==='text' || element.type === 'textarea') {
+            if (element.value !== modelValue) {
                 element.value = modelValue;
-                element.onchange = function() {
-                    model.attr(name, element.value);
-                };
             }
-            else if (element.type ==='text' || element.type === 'textarea') {
-                if (element.value !== modelValue) {
-                    element.value = modelValue;
-                }
-                element.oninput = function() {
-                    model.attr(name, element.value);
-                };
-            } else {
-                element.innerHTML = modelValue;
-            }
+            element.oninput = function() {
+                model.attr(name, element.value);
+            };
+        } else {
+            element.innerHTML = modelValue;
         }
     };
 

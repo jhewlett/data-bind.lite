@@ -25,6 +25,22 @@ describe('model', function() {
         });
     });
 
+    describe('calling attr with nonexistent object', function() {
+        beforeEach(function() {
+            model.attr('prop', 'dontTouchMe');
+
+            model.attr('item.prop', 'myValue');
+        });
+
+        it('should create object and add to dictionary', function() {
+            expect(model.get('item.prop')).toEqual('myValue');
+        });
+
+        it('should not use "prop" as key', function() {
+            expect(model.get('prop')).toEqual('dontTouchMe')
+        });
+    });
+
     describe('pushing to array', function() {
         var valueChanged;
         beforeEach(function() {

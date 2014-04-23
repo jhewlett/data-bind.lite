@@ -55,6 +55,9 @@ DataBind.Model = function(scope) {
             attrs[name] = value;
             fireValueChangedForAllDependencies(name);
         } else {
+            if (attrs[dotPieces[0]] === undefined) {
+                attrs[dotPieces[0]] = {};
+            }
             attr(rest, value, attrs[dotPieces[0]], fullName);
         }
     };
@@ -105,7 +108,6 @@ DataBind.Model = function(scope) {
             if (typeof attrs[dotPieces[0]] === 'function') {
                 return attrs[dotPieces[0]].apply(this, args);
             }
-
             return checkWrapArray(name, attrs[name]);
         }
 
