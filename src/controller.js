@@ -23,6 +23,7 @@ model.alert = function() {
 };
 
 model.attr('items', [{color: 'four', name: 'joe'}, {color: 'three', name: 'john'}]);
+model.attr('items2', [{color: 'four', name: 'joe'}, {color: 'three', name: 'john'}]);
 
 var binder = new DataBind.Binder(model);
 binder.bind();

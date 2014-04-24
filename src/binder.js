@@ -11,8 +11,8 @@ DataBind.Binder = function(model, document) {
     model.setValueChanged(valueChangedHandler);
 
     function valueChangedHandler(name) {
-        var foreachElements = scopeElement.querySelectorAll('[data-foreach]');
-        bindForeach(foreachElements);
+        var foreachElements = scopeElement.querySelectorAll('[data-foreach$="in ' + name + '"]');
+        bindForeach(foreachElements, name);
 
         bindElementsInForeach(foreachElements);
 
@@ -132,7 +132,6 @@ DataBind.Binder = function(model, document) {
 
                     convertBinding(clone, 'data-bind', foreach[i], j);
                     convertBinding(clone, 'data-class', foreach[i], j);
-                    //convertBinding(clone, 'data-click', foreach[i], j);
                 }
             }
         }

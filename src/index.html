@@ -8,14 +8,17 @@
     <div data-scope="one">
         <!--<button data-click="add()">Add item</button>-->
         <!--<br>-->
-        <!--<ul data-foreach="item in items">-->
-            <!--<li data-class="getClass(item)" data-bind="item.name"></li>-->
-        <!--</ul>-->
+        <ul data-foreach="item in items">
+            <li data-class="getClass(item)" data-bind="item.name"></li>
+        </ul>
 
-        <input type="checkbox" data-bind="obj.checked">
-        <p data-bind="obj.checked"></p>
+        <input type="text" data-bind="items[0].name">
 
-        <!--<div data-bind="items[0].firstName"></div>-->
+        <ul data-foreach="item in items2">
+            <li data-class="getClass(item)" data-bind="item.name"></li>
+        </ul>
+
+        <input type="text" data-bind="items2[0].name">
 
         <!--My Collection:-->
         <!--<span data-bind="array"></span>  <br>-->
