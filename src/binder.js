@@ -6,7 +6,7 @@ DataBind.Binder = function(model, document) {
     var doc = document || window.document;
     var scopeElement = doc.querySelector('[data-scope=' + model.scope + ']');
     var currentValue = {};
-    var foreach = [];
+    var foreach = {};
 
     model.setValueChanged(valueChangedHandler);
 
@@ -115,7 +115,7 @@ DataBind.Binder = function(model, document) {
             var forIn = elements[i].getAttribute('data-foreach');
             var pieces = forIn.split('in');
 
-            foreach[i] = { template: templateChildren, items: pieces[1].trim(), item: pieces[0].trim() };
+            foreach[elements[i].id] = { template: templateChildren, items: pieces[1].trim(), item: pieces[0].trim() };
         }
     };
 
@@ -124,14 +124,16 @@ DataBind.Binder = function(model, document) {
 
             clearChildren(elements[i]);
 
-            var value = model.get(foreach[i].items);
+            var foreachTemplate = foreach[elements[i].id];
+
+            var value = model.get(foreachTemplate.items);
             for (var j = 0; j < value.length(); j++) {
-                for (var k = 0; k < foreach[i].template.length; k++) {
-                    var clone = foreach[i].template[k].cloneNode(true);
+                for (var k = 0; k < foreachTemplate.template.length; k++) {
+                    var clone = foreachTemplate.template[k].cloneNode(true);
                     elements[i].appendChild(clone);
 
-                    convertBinding(clone, 'data-bind', foreach[i], j);
-                    convertBinding(clone, 'data-class', foreach[i], j);
+                    convertBinding(clone, 'data-bind', foreachTemplate, j);
+                    convertBinding(clone, 'data-class', foreachTemplate, j);
                 }
             }
         }
