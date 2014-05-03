@@ -152,6 +152,10 @@ DataBind.Model = function(scope) {
         attrs[name] = func;
     };
 
+    var action = function(name, func) {
+        attrs[name] = func;
+    };
+
     var addDependency = function(name, dependency) {
         dependsOn[dependency] = dependsOn[dependency] || [];
         dependsOn[dependency].push(name);
@@ -173,6 +177,7 @@ DataBind.Model = function(scope) {
         attr: attr,
         get: get,
         computed: computed,
+        action: action,
         scope: scope,
         setValueChanged: setValueChanged
     };

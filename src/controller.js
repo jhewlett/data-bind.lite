@@ -18,11 +18,7 @@ model.computed('getClass', function(number) {
     return number;
 }, ['tasks']);
 
-model.alert = function() {
-    alert('enter pressed!');
-};
-
-model.computed('add', function(newTask) {
+model.action('add', function(newTask) {
     this.get('tasks').push(newTask);
 });
 
