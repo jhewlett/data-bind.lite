@@ -131,6 +131,12 @@ describe('model', function() {
             expect(model.get('computed.computedProp')).toEqual(4);
         });
 
+        it('should handle computed property with args in object graph', function() {
+            model.computed('computed', function(num) {return {computedProp: 3}});
+
+            expect(model.get('computed(2).computedProp')).toEqual(3);
+        });
+
         it('should handle array access at beginning', function() {
             model.attr('items', [{number: 0}, {number: 1}]);
 

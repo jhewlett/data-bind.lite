@@ -62,26 +62,34 @@ DataBind.Model = function(scope) {
         }
     };
 
+    var parseFunctionCall = function(expression) {
+        var args = [];
+        var functionName = expression;
+
+        var argsRegex = /[(][^)]+[)]/;
+        var match = argsRegex.exec(expression);
+        if (match !== null) {
+            functionName = expression.substring(0, match.index);
+
+            var commaSeparatedArgs = match[0].replace('(', '').replace(')', '');
+
+            var argPieces = commaSeparatedArgs.split(',');
+
+            argPieces.forEach(function(piece) {
+                args.push(get.call(this, piece.trim()));
+            });
+        }
+
+        return {name: functionName, args: args };
+    };
+
     var get = function(name, object, fullName) {
         fullName = fullName || name;
 
         var dotPieces = name.split('.');
         var rest = dotPieces.slice(1, dotPieces.length).join('.');
 
-        var argsRegex = /[(][^)]+[)]/;
-        var match = argsRegex.exec(dotPieces[0]);
-        var args = [];
-        if (match !== null) {
-            dotPieces[0] = dotPieces[0].substring(0, match.index);
-
-            match[0] = match[0].replace('(', '').replace(')', '');
-
-            var split = match[0].split(',');
-
-            split.forEach(function(piece) {
-                args.push(get.call(this, piece.trim()));
-            });
-        }
+        var func = parseFunctionCall(dotPieces[0]);
 
         var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
 
@@ -105,14 +113,14 @@ DataBind.Model = function(scope) {
         }
 
         if (dotPieces.length === 1) {
-            if (typeof attrs[dotPieces[0]] === 'function') {
-                return attrs[dotPieces[0]].apply(this, args);
+            if (typeof attrs[func.name] === 'function') {
+                return attrs[func.name].apply(this, func.args);
             }
             return checkWrapArray(name, attrs[name]);
         }
 
-        var thisObject = typeof attrs[dotPieces[0]] === 'function'
-            ? attrs[dotPieces[0]].apply(this, args)
+        var thisObject = typeof attrs[func.name] === 'function'
+            ? attrs[func.name].apply(this, func.args)
             : attrs[dotPieces[0]];
 
         return get.call(this, rest, thisObject, fullName);
