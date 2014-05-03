@@ -94,7 +94,7 @@ DataBind.Binder = function(model, document) {
 
         element.onkeydown = function(event) {
             if (event.which === 13) {
-                eval('model.' + expression);
+                model.get(expression);
             }
         };
     };
@@ -167,7 +167,7 @@ DataBind.Binder = function(model, document) {
         var expression = element.getAttribute('data-click');
 
         element.onclick = function() {
-            eval('model.' + expression);
+            model.get(expression);
         };
     };
 

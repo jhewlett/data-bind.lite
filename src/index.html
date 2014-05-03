@@ -8,17 +8,13 @@
     <div data-scope="one">
         <!--<button data-click="add()">Add item</button>-->
         <!--<br>-->
-        <ul id="items" data-foreach="item in items">
-            <li data-class="getClass(item)" data-bind="item.name"></li>
+        <ul id="items" data-foreach="task in tasks">
+            <li data-bind="task"></li>
         </ul>
 
-        <input type="text" data-bind="items[0].name">
+        <input data-enter="add(newTask)" type="text" data-bind="newTask" >
 
-        <ul id="items2" data-foreach="item in items2">
-            <li data-class="getClass(item)" data-bind="item.name"></li>
-        </ul>
-
-        <input type="text" data-bind="items2[0].name">
+        <button data-click="add(newTask)" >Add</button>
 
         <!--My Collection:-->
         <!--<span data-bind="array"></span>  <br>-->

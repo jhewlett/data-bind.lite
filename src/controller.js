@@ -14,16 +14,19 @@ model.computed('sentence', function() {
     return this.get("fullName") + ' went to the store';
 });
 
-model.computed('getClass', function(item) {
-    return item.name;
-}, ['items']);
+model.computed('getClass', function(number) {
+    return number;
+}, ['tasks']);
 
 model.alert = function() {
     alert('enter pressed!');
 };
 
-model.attr('items', [{color: 'four', name: 'joe'}, {color: 'three', name: 'john'}]);
-model.attr('items2', [{color: 'four', name: 'joe'}, {color: 'three', name: 'john'}]);
+model.computed('add', function(newTask) {
+    this.get('tasks').push(newTask);
+});
+
+model.attr('tasks', ["do this", "do that", "and the other"]);
 
 var binder = new DataBind.Binder(model);
 binder.bind();
