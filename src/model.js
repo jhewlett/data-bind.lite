@@ -66,14 +66,16 @@ DataBind.Model = function(scope) {
         var args = [];
         var functionName = expression;
 
-        var argsRegex = /[(][^)]+[)]/;
+        var argsRegex = /[(][^)]*[)]/;
         var match = argsRegex.exec(expression);
         if (match !== null) {
             functionName = expression.substring(0, match.index);
 
             var commaSeparatedArgs = match[0].replace('(', '').replace(')', '');
 
-            var argPieces = commaSeparatedArgs.split(',');
+            var argPieces = commaSeparatedArgs.length > 0
+                ? commaSeparatedArgs.split(',')
+                : [];
 
             argPieces.forEach(function(piece) {
                 args.push(get.call(this, piece.trim()));
@@ -136,9 +138,9 @@ DataBind.Model = function(scope) {
         valueChanged(name);
 
         if (dependsOn.hasOwnProperty(name)) {
-            for(var i = 0; i < dependsOn[name].length; i++) {
-                fireValueChangedForAllDependencies(dependsOn[name][i]);
-            }
+            dependsOn[name].forEach(function(dependency) {
+                fireValueChangedForAllDependencies(dependency);
+            });
         }
     };
 

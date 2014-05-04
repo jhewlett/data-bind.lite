@@ -4,6 +4,7 @@ var model = new DataBind.Model('one');
 
 model.attr('firstName', 'Justin');
 model.attr('lastName', 'Hewlett');
+model.attr('newTask', '');
 //model.attr('checked', true);
 //model.attr('sex', 'male');
 model.computed('fullName', function() {
@@ -18,8 +19,8 @@ model.computed('getClass', function(number) {
     return number;
 }, ['tasks']);
 
-model.action('add', function(newTask) {
-    this.get('tasks').push(newTask);
+model.action('add', function() {
+    this.get('tasks').push(this.get('newTask'));
 });
 
 model.attr('tasks', ["do this", "do that", "and the other"]);

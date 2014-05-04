@@ -188,6 +188,21 @@ describe('model', function() {
         });
     });
 
+    describe('action with no arguments', function() {
+        var spy;
+        beforeEach(function() {
+            spy = sinon.spy();
+
+            model.action('myAction', spy);
+        });
+
+        it('should call action', function() {
+            model.get('myAction()');
+
+            expect(spy.calledWithExactly()).toBeTruthy();
+        });
+    });
+
     describe('modifying property on array item', function() {
         var valueChanged;
 
