@@ -286,12 +286,12 @@ describe('model', function() {
             methodSpy = sinon.spy();
 
             model.attr('arg1', 'value1');
-            model.attr('arg2', 'value2');
+            model.attr('items', ['value2']);
             model.computed('func', methodSpy);
         });
 
         it('should pass parameter', function() {
-            model.get('func(arg1, arg2)');
+            model.get('func(arg1, items[0])');
 
             expect(methodSpy.calledWith('value1', 'value2')).toBeTruthy();
         });

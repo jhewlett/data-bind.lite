@@ -82,7 +82,7 @@ DataBind.Model = function(scope) {
             });
         }
 
-        return {name: functionName, args: args };
+        return {name: functionName, args: args, isMatch: match !== null };
     };
 
     var get = function(name, object, fullName) {
@@ -91,19 +91,21 @@ DataBind.Model = function(scope) {
         var dotPieces = name.split('.');
         var rest = dotPieces.slice(1, dotPieces.length).join('.');
 
-        var func = parseFunctionCall(dotPieces[0]);
+        var parseFuncResult = parseFunctionCall(dotPieces[0]);
 
-        var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
+        if (!parseFuncResult.isMatch) {
+            var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
 
-        if (arrayIndexer !== null) {
-            var prop = dotPieces[0].substring(0, arrayIndexer.index);
-            var index = getIndex(arrayIndexer[1]);
+            if (arrayIndexer !== null) {
+                var prop = dotPieces[0].substring(0, arrayIndexer.index);
+                var index = getIndex(arrayIndexer[1]);
 
-            if (object !== undefined) {
-                return get.call(this, rest, eval('object.' + prop)[index], fullName);
+                if (object !== undefined) {
+                    return get.call(this, rest, eval('object.' + prop)[index], fullName);
+                }
+
+                return get.call(this, rest, attrs[prop][index], fullName);
             }
-
-            return get.call(this, rest, attrs[prop][index], fullName);
         }
 
         if (object !== undefined) {
@@ -115,14 +117,14 @@ DataBind.Model = function(scope) {
         }
 
         if (dotPieces.length === 1) {
-            if (typeof attrs[func.name] === 'function') {
-                return attrs[func.name].apply(this, func.args);
+            if (typeof attrs[parseFuncResult.name] === 'function') {
+                return attrs[parseFuncResult.name].apply(this, parseFuncResult.args);
             }
             return checkWrapArray(name, attrs[name]);
         }
 
-        var thisObject = typeof attrs[func.name] === 'function'
-            ? attrs[func.name].apply(this, func.args)
+        var thisObject = typeof attrs[parseFuncResult.name] === 'function'
+            ? attrs[parseFuncResult.name].apply(this, parseFuncResult.args)
             : attrs[dotPieces[0]];
 
         return get.call(this, rest, thisObject, fullName);
