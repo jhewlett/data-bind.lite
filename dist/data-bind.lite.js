@@ -415,6 +415,8 @@ DataBind.Model = function(scope) {
         setValueChanged: setValueChanged
     };
 };
+"use strict";
+
 var DataBind = DataBind || {};
 
 DataBind.Collection = function(name, arr, valueChangedCallback) {

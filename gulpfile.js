@@ -9,10 +9,10 @@ gulp.task('build', function(){
         .pipe(concat('data-bind.lite.js'))        //concat
         .pipe(gulp.dest('dist'))
 
-        .pipe(rename('data-bind.lite.min.js'))    //minified
+        .pipe(rename('data-bind.lite.min.js'))    //minify
         .pipe(uglify())
         .pipe(gulp.dest('dist'))
 
-        .pipe(gzip())                             //minified + gzip
+        .pipe(gzip())                             //minify + gzip
         .pipe(gulp.dest('dist'));
 });

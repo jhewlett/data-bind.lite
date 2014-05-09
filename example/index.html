@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>About Me</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body>
+
+    <div data-scope="aboutMe">
+        <strong>Full name:</strong> <span data-bind="fullName"></span>
+        <br>
+        <strong>Also known as:</strong>
+        <ul id="aliases" data-foreach="alias in aliases">
+            <li data-bind="alias.title" data-class="alias.style"></li>
+        </ul>
+
+        <input data-enter="addAlias()" type="text" data-bind="newAlias">
+
+        <button data-click="addAlias()">Add Alias</button>
+    </div>
+
+    <script src="../dist/data-bind.lite.min.js"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>

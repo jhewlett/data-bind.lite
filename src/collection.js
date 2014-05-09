@@ -1,3 +1,5 @@
+"use strict";
+
 var DataBind = DataBind || {};
 
 DataBind.Collection = function(name, arr, valueChangedCallback) {
