@@ -1,7 +1,7 @@
 data-bind.lite
 ==============
 
-Tiny 2-way data-binding library written in javascript.
+Lightweight data-binding library. Weighs in at just under 2kb minified and gzipped.
 
 Declarative syntax:
 -------------------
