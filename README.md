@@ -100,7 +100,7 @@ Html:
 ```
 
 Javascript:
-```
+```javascript
 var model = new DataBind.Model('aboutMe');
 
 model.attr('firstName', 'Justin');
