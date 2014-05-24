@@ -157,6 +157,12 @@ describe('model', function() {
         });
     });
 
+    describe('getting a number', function() {
+        it('should return the number, parsed', function() {
+            expect(model.get("5")).toEqual(5);
+        });
+    });
+
     describe('computed properties with dependencies', function() {
         var valueChanged;
         beforeEach(function() {

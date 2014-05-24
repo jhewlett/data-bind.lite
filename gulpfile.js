@@ -4,7 +4,7 @@ var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
 var gzip = require('gulp-gzip');
 
-gulp.task('build', function(){
+gulp.task('default', function(){
     return gulp.src(['src/binder.js', 'src/model.js', 'src/collection.js'])
         .pipe(concat('data-bind.lite.js'))        //concat
         .pipe(gulp.dest('dist'))

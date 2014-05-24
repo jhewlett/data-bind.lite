@@ -309,6 +309,10 @@ DataBind.Model = function(scope) {
     var get = function(name, object, fullName) {
         fullName = fullName || name;
 
+        if (/^\d+$/.test(name)) {
+            return parseInt(name);
+        }
+
         var dotPieces = name.split('.');
         var rest = dotPieces.slice(1, dotPieces.length).join('.');
 
