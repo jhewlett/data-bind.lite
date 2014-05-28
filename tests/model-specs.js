@@ -112,6 +112,36 @@ describe('model', function() {
         });
     });
 
+    describe('calling attr with 2d array indexing', function() {
+        var valueChanged;
+        beforeEach(function() {
+            valueChanged = sinon.spy();
+            model.attr('items', [[0, 1], [2, 3]]);
+            model.setValueChanged(valueChanged);
+        });
+
+        it('should set the individual item', function() {
+            model.attr('items[1][0]', 4);
+            expect(model.get('items').value[1][0]).toEqual(4);
+            expect(valueChanged.calledWith('items[1][0]')).toBeTruthy();
+        })
+    });
+
+    describe('calling attr with 3d array indexing', function() {
+        var valueChanged;
+        beforeEach(function() {
+            valueChanged = sinon.spy();
+            model.attr('items', [[[0, 1]]]);
+            model.setValueChanged(valueChanged);
+        });
+
+        it('should set the individual item', function() {
+            model.attr('items[0][0][1]', 7);
+            expect(model.get('items').value[0][0][1]).toEqual(7);
+            expect(valueChanged.calledWith('items[0][0][1]')).toBeTruthy();
+        })
+    });
+
     describe('getting object graph', function() {
         it('should dig into object', function() {
             model.attr('object', {prop: 'value'});
@@ -154,6 +184,12 @@ describe('model', function() {
             model.attr('items', [0, 1]);
 
             expect(model.get('items[index]')).toEqual(1);
+        });
+
+        it('should handle multiple array indexing expressions', function() {
+            model.attr('items', [[[0, 1]]]);
+
+            expect(model.get('items[0][0][1]')).toEqual(1);
         });
     });
 

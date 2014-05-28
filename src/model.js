@@ -19,11 +19,28 @@ var DataBind = (function (dataBind) {
             });
         };
 
+        function tokenize(name) {
+            var pieces = name.split('.');
+            for(var i = 0; i < pieces.length; i++) {
+                var splitArr = pieces[i].indexOf('][');
+                if (splitArr >= 0) {
+                    var firstPart = pieces[i].substring(0, splitArr + 1);
+                    var secondPart = pieces[i].substring(splitArr + 1);
+
+                    pieces.splice(i, 1);
+                    pieces.splice(i, 0, firstPart);
+                    pieces.splice(i + 1, 0, secondPart);
+                }
+            }
+
+            return pieces;
+        }
+
         var attr = function (name, value, object, fullName, changedCollections) {
             fullName = fullName || name;
             changedCollections = changedCollections || [];
 
-            var dotPieces = name.split('.');
+            var dotPieces = tokenize(name);
             var rest = dotPieces.slice(1, dotPieces.length).join('.');
 
             var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
@@ -32,10 +49,22 @@ var DataBind = (function (dataBind) {
                 var prop = dotPieces[0].substring(0, arrayIndexer.index);
                 var index = getIndex(arrayIndexer[1]);
 
-                changedCollections.push(prop);
+                if (prop !== '') {
+                    changedCollections.push(prop);
+                }
 
                 if (object !== undefined) {
-                    attr(rest, value, eval('object.' + prop)[index], fullName, changedCollections);
+                    if (prop === '') {
+                        if (dotPieces.length === 1) {
+                            object[index] = value;
+                            fireValueChangedForAllDependencies(fullName);
+                            fireValueChangedForAll(changedCollections);
+                        } else {
+                            attr(rest, value, object[index], fullName, changedCollections);
+                        }
+                    } else {
+                        attr(rest, value, eval('object.' + prop)[index], fullName, changedCollections);
+                    }
                 } else if (dotPieces.length === 1) {
                     attrs[prop][index] = value;
                     fireValueChangedForAllDependencies(fullName);
@@ -92,7 +121,8 @@ var DataBind = (function (dataBind) {
                 return parseInt(name);
             }
 
-            var dotPieces = name.split('.');
+            var dotPieces = tokenize(name);
+
             var rest = dotPieces.slice(1, dotPieces.length).join('.');
 
             var parseFuncResult = parseFunctionCall(dotPieces[0]);
@@ -105,6 +135,9 @@ var DataBind = (function (dataBind) {
                     var index = getIndex(arrayIndexer[1]);
 
                     if (object !== undefined) {
+                        if (prop === '') {
+                            return get.call(this, rest, object[index], fullName);
+                        }
                         return get.call(this, rest, eval('object.' + prop)[index], fullName);
                     }
 

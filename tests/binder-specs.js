@@ -17,6 +17,7 @@ describe('binder', function() {
         scopeElement.querySelectorAll.withArgs('[data-class]').returns([]);
         scopeElement.querySelectorAll.withArgs('[data-template]').returns([]);
         scopeElement.querySelectorAll.withArgs('[data-foreach]').returns([]);
+        scopeElement.querySelectorAll.withArgs('[data-foreach] [data-foreach]').returns([]);
         scopeElement.querySelectorAll.withArgs('[data-enter]').returns([]);
         documentStub.querySelector.withArgs('[data-scope=scope]').returns(scopeElement);
 
@@ -25,6 +26,7 @@ describe('binder', function() {
 
     describe('foreach', function() {
         var foreachNode;
+        var excludeNode;
         var childNode;
         var templateNode;
         var cloneNode;
@@ -45,8 +47,10 @@ describe('binder', function() {
 
             foreachNode = sinon.stub({getAttribute: function() {}, children: [childNode], appendChild: function() {}, removeChild: function() {}});
             foreachNode.getAttribute.withArgs('data-foreach').returns('item in items');
+            excludeNode = {};
 
-            scopeElement.querySelectorAll.withArgs('[data-foreach]').returns([foreachNode]);
+            scopeElement.querySelectorAll.withArgs('[data-foreach]').returns([excludeNode, foreachNode]);
+            scopeElement.querySelectorAll.withArgs('[data-foreach] [data-foreach]').returns([excludeNode]);
         };
 
         describe('simple binding', function() {
