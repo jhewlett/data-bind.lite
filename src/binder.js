@@ -151,6 +151,7 @@ var DataBind = (function (dataBind) {
 
                         convertBinding(clone, 'data-bind', foreachTemplate, j);
                         convertBinding(clone, 'data-class', foreachTemplate, j);
+                        convertBinding(clone, 'data-click', foreachTemplate, j);
                         convertBinding(clone, 'data-foreach', foreachTemplate, j);
                     }
                 }

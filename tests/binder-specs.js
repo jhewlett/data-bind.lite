@@ -39,6 +39,9 @@ describe('binder', function() {
             cloneNode.hasAttribute.withArgs('data-class').returns(true);
             cloneNode.getAttribute.withArgs('data-class').returns(expression);
 
+            cloneNode.hasAttribute.withArgs('data-click').returns(true);
+            cloneNode.getAttribute.withArgs('data-click').returns(expression);
+
             templateNode = sinon.stub({cloneNode: function() { }});
             templateNode.cloneNode.withArgs(true).returns(cloneNode);
 
@@ -70,6 +73,9 @@ describe('binder', function() {
 
                 expect(cloneNode.setAttribute.calledWith('data-class', 'items[0]')).toBeTruthy();
                 expect(cloneNode.setAttribute.calledWith('data-class', 'items[1]')).toBeTruthy();
+
+                expect(cloneNode.setAttribute.calledWith('data-click', 'items[0]')).toBeTruthy();
+                expect(cloneNode.setAttribute.calledWith('data-click', 'items[1]')).toBeTruthy();
 
                 //todo: test that children get converted, too
             });
