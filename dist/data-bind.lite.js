@@ -64,10 +64,27 @@ var DataBind = (function (dataBind) {
             }
         };
 
+        function excludeNested(all, nested) {
+            var arr = [].slice.call(all);
+            for(var i = 0; i < arr.length; i++) {
+                for (var j = 0; j < nested.length; j++) {
+                    if (arr[i] === nested[j]) {
+                        arr.splice(i, 1);
+                    }
+                }
+            }
+
+            return arr;
+        }
+
         var bind = function () {
             var foreachElements = scopeElement.querySelectorAll('[data-foreach]');
-            captureForeach(foreachElements);
-            bindForeach(foreachElements);
+            var nestedForeachElements = scopeElement.querySelectorAll('[data-foreach] [data-foreach]');
+
+            var outerForeachElements = excludeNested(foreachElements, nestedForeachElements);
+
+            captureForeach(outerForeachElements);
+            bindForeach(outerForeachElements);
 
             var valueElements = scopeElement.querySelectorAll('[data-bind]');
             bindValues(valueElements);
@@ -112,20 +129,21 @@ var DataBind = (function (dataBind) {
                 }
 
                 var forIn = elements[i].getAttribute('data-foreach');
-                var pieces = forIn.split('in');
+                var pieces = forIn.split(' in ');
 
-                foreach[elements[i].id] = { template: templateChildren, items: pieces[1].trim(), item: pieces[0].trim() };
+                foreach[forIn] = { template: templateChildren, items: pieces[1].trim(), item: pieces[0].trim() };
             }
         };
 
         var bindForeach = function (elements) {
             for (var i = 0; i < elements.length; i++) {
-
                 clearChildren(elements[i]);
 
-                var foreachTemplate = foreach[elements[i].id];
+                var forIn = elements[i].getAttribute('data-foreach');
+                var foreachTemplate = foreach[forIn];
 
                 var value = model.get(foreachTemplate.items);
+
                 for (var j = 0; j < value.length(); j++) {
                     for (var k = 0; k < foreachTemplate.template.length; k++) {
                         var clone = foreachTemplate.template[k].cloneNode(true);
@@ -133,6 +151,7 @@ var DataBind = (function (dataBind) {
 
                         convertBinding(clone, 'data-bind', foreachTemplate, j);
                         convertBinding(clone, 'data-class', foreachTemplate, j);
+                        convertBinding(clone, 'data-foreach', foreachTemplate, j);
                     }
                 }
             }
@@ -150,11 +169,18 @@ var DataBind = (function (dataBind) {
             };
 
             if (element.hasAttribute(attribute)) {
-                var newAttribute = element.getAttribute(attribute)
-                    .replace(new RegExp('^' + template.item + '(?=[.]|$)'), template.items + '[' + index + ']')
-                    .replace(new RegExp('[(,] *' + template.item + ' *(?=[,)])', 'g'), replace);
+                var oldAttribute = element.getAttribute(attribute);
+                var newAttribute = oldAttribute
+                    .replace(new RegExp('^' + template.item + '(?=[.]|$)'), template.items + '[' + index + ']')     //lone identifiers
+                    .replace(new RegExp('[(,] *' + template.item + ' *(?=[,)])', 'g'), replace)    //method parameters
+                    .replace(new RegExp(' in ' + template.item + '$'), ' in ' + template.items + '[' + index + ']');
 
                 element.setAttribute(attribute, newAttribute);
+
+                if (attribute === 'data-foreach') {
+                    captureForeach([element]);
+                    bindForeach([element]);
+                }
             }
 
             for (var i = 0; i < element.children.length; i++) {
@@ -242,11 +268,28 @@ var DataBind = (function (dataBind) {
             });
         };
 
+        function tokenize(name) {
+            var pieces = name.split('.');
+            for(var i = 0; i < pieces.length; i++) {
+                var splitArr = pieces[i].indexOf('][');
+                if (splitArr >= 0) {
+                    var firstPart = pieces[i].substring(0, splitArr + 1);
+                    var secondPart = pieces[i].substring(splitArr + 1);
+
+                    pieces.splice(i, 1);
+                    pieces.splice(i, 0, firstPart);
+                    pieces.splice(i + 1, 0, secondPart);
+                }
+            }
+
+            return pieces;
+        }
+
         var attr = function (name, value, object, fullName, changedCollections) {
             fullName = fullName || name;
             changedCollections = changedCollections || [];
 
-            var dotPieces = name.split('.');
+            var dotPieces = tokenize(name);
             var rest = dotPieces.slice(1, dotPieces.length).join('.');
 
             var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
@@ -255,10 +298,22 @@ var DataBind = (function (dataBind) {
                 var prop = dotPieces[0].substring(0, arrayIndexer.index);
                 var index = getIndex(arrayIndexer[1]);
 
-                changedCollections.push(prop);
+                if (prop !== '') {
+                    changedCollections.push(prop);
+                }
 
                 if (object !== undefined) {
-                    attr(rest, value, eval('object.' + prop)[index], fullName, changedCollections);
+                    if (prop === '') {
+                        if (dotPieces.length === 1) {
+                            object[index] = value;
+                            fireValueChangedForAllDependencies(fullName);
+                            fireValueChangedForAll(changedCollections);
+                        } else {
+                            attr(rest, value, object[index], fullName, changedCollections);
+                        }
+                    } else {
+                        attr(rest, value, eval('object.' + prop)[index], fullName, changedCollections);
+                    }
                 } else if (dotPieces.length === 1) {
                     attrs[prop][index] = value;
                     fireValueChangedForAllDependencies(fullName);
@@ -315,7 +370,8 @@ var DataBind = (function (dataBind) {
                 return parseInt(name);
             }
 
-            var dotPieces = name.split('.');
+            var dotPieces = tokenize(name);
+
             var rest = dotPieces.slice(1, dotPieces.length).join('.');
 
             var parseFuncResult = parseFunctionCall(dotPieces[0]);
@@ -328,6 +384,9 @@ var DataBind = (function (dataBind) {
                     var index = getIndex(arrayIndexer[1]);
 
                     if (object !== undefined) {
+                        if (prop === '') {
+                            return get.call(this, rest, object[index], fullName);
+                        }
                         return get.call(this, rest, eval('object.' + prop)[index], fullName);
                     }
 
