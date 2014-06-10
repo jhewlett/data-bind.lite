@@ -14,6 +14,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      '../src/parser.js',
       '../src/model.js',
       '../src/binder.js',
       '../src/collection.js',

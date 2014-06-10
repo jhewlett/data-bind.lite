@@ -21,8 +21,8 @@ describe('model', function() {
             it('should invoke the action', function() {
                 model.call('doSomething(arg, 2, "literal")');
 
-                expect(actionSpy.calledWith(1, 2, "literal")).toBeTruthy();
                 expect(actionSpy.calledOnce).toBeTruthy();
+                expect(actionSpy.calledWith(1, 2, "literal")).toBeTruthy();
             });
         });
     });
