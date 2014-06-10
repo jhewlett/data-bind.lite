@@ -44,7 +44,6 @@ var DataBind = (function (dataBind) {
             var rest = dotPieces.slice(1, dotPieces.length).join('.');
 
             var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
-
             if (arrayIndexer !== null) {
                 var prop = dotPieces[0].substring(0, arrayIndexer.index);
                 var index = getIndex(arrayIndexer[1]);
@@ -91,6 +90,11 @@ var DataBind = (function (dataBind) {
             }
         };
 
+        var checkForStringLiteral = function(name) {
+            var stringLiteralRegex = /^['"]([^'"]*)['"]$/;
+            return stringLiteralRegex.exec(name);
+        };
+
         var parseFunctionCall = function (expression) {
             var args = [];
             var functionName = expression;
@@ -121,12 +125,16 @@ var DataBind = (function (dataBind) {
                 return parseInt(name);
             }
 
+            var stringLiteralMatch = checkForStringLiteral(name);
+            if (stringLiteralMatch !== null) {
+                return stringLiteralMatch[1];
+            }
+
             var dotPieces = tokenize(name);
 
             var rest = dotPieces.slice(1, dotPieces.length).join('.');
 
             var parseFuncResult = parseFunctionCall(dotPieces[0]);
-
             if (!parseFuncResult.isMatch) {
                 var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
 

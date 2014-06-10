@@ -19,9 +19,9 @@ describe('model', function() {
             });
 
             it('should invoke the action', function() {
-                model.call('doSomething(arg, 2)');
+                model.call('doSomething(arg, 2, "literal")');
 
-                expect(actionSpy.calledWith(1, 2)).toBeTruthy();
+                expect(actionSpy.calledWith(1, 2, "literal")).toBeTruthy();
                 expect(actionSpy.calledOnce).toBeTruthy();
             });
         });
@@ -214,6 +214,18 @@ describe('model', function() {
     describe('getting a number', function() {
         it('should return the number, parsed', function() {
             expect(model.get("5")).toEqual(5);
+        });
+    });
+
+    describe('getting a single-quoted string', function() {
+        it('should return the string', function() {
+            expect(model.get("'string'")).toEqual('string');
+        });
+    });
+
+    describe('getting a double-quoted string', function() {
+        it('should return the string', function() {
+            expect(model.get('"string"')).toEqual("string");
         });
     });
 
