@@ -9,6 +9,24 @@ describe('model', function() {
         expect(model.scope).toEqual("my scope");
     });
 
+    describe('call function', function() {
+        describe('identifier exists', function() {
+            var actionSpy;
+            beforeEach(function() {
+                actionSpy = sinon.spy();
+                model.action('doSomething', actionSpy);
+                model.attr('arg', 1);
+            });
+
+            it('should invoke the action', function() {
+                model.call('doSomething(arg, 2)');
+
+                expect(actionSpy.calledWith(1, 2)).toBeTruthy();
+                expect(actionSpy.calledOnce).toBeTruthy();
+            });
+        });
+    });
+
     describe('calling attr with array index', function() {
         var valueChanged;
         beforeEach(function() {

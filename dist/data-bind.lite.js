@@ -478,7 +478,8 @@ var DataBind = (function (dataBind) {
             computed: computed,
             action: action,
             scope: scope,
-            setValueChanged: setValueChanged
+            setValueChanged: setValueChanged,
+            call: function(actionExpr) { get(actionExpr); }
         };
     };
 
