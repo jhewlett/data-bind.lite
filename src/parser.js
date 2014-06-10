@@ -46,7 +46,7 @@ var DataBind = (function (dataBind) {
                     : [];
 
                 argPieces.forEach(function (piece) {
-                    args.push(get(piece.trim(), undefined, undefined, attrs));
+                    args.push(get.call(context, piece.trim(), undefined, undefined, attrs));
                 });
             }
 
@@ -124,8 +124,69 @@ var DataBind = (function (dataBind) {
             return get.call(context, rest, thisObject, fullName, attrs);
         };
 
+        var attr = function (attrs, name, value, object, fullName, changedCollections) {
+            fullName = fullName || name;
+            changedCollections = changedCollections || [];
+
+            var dotPieces = tokenize(name);
+            var rest = dotPieces.slice(1, dotPieces.length).join('.');
+
+            var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
+            if (arrayIndexer !== null) {
+                var prop = dotPieces[0].substring(0, arrayIndexer.index);
+                var index = getIndex(arrayIndexer[1]);
+
+                if (prop !== '') {
+                    changedCollections.push(prop);
+                }
+
+                if (object !== undefined) {
+                    if (prop === '') {
+                        if (dotPieces.length === 1) {
+                            object[index] = value;
+                            fireValueChangedForAllDependencies(fullName);
+                            fireValueChangedForAll(changedCollections);
+                        } else {
+                            attr(attrs, rest, value, object[index], fullName, changedCollections);
+                        }
+                    } else {
+                        attr(attrs, rest, value, eval('object.' + prop)[index], fullName, changedCollections);
+                    }
+                } else if (dotPieces.length === 1) {
+                    attrs[prop][index] = value;
+                    fireValueChangedForAllDependencies(fullName);
+                    fireValueChangedForAll(changedCollections);
+                } else {
+                    attr(attrs, rest, value, attrs[prop][index], fullName, changedCollections);
+                }
+            } else if (object !== undefined) {
+                if (dotPieces.length === 1) {
+                    object[dotPieces[0]] = value;
+                    fireValueChangedForAllDependencies(fullName);
+                    fireValueChangedForAll(changedCollections);
+                } else {
+                    attr(attrs, rest, value, eval('object.' + dotPieces[0]), fullName);
+                }
+            } else if (dotPieces.length === 1) {
+                attrs[name] = value;
+                fireValueChangedForAllDependencies(name);
+            } else {
+                if (attrs[dotPieces[0]] === undefined) {
+                    attrs[dotPieces[0]] = {};
+                }
+                attr(attrs, rest, value, attrs[dotPieces[0]], fullName);
+            }
+        };
+
+        var fireValueChangedForAll = function (items) {
+            items.forEach(function (item) {
+                fireValueChangedForAllDependencies(item);
+            });
+        };
+
         return {
-            get: get
+            get: get,
+            attr: attr
         };
     };
 
