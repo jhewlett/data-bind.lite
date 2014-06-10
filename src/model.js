@@ -8,15 +8,15 @@ var DataBind = (function (dataBind) {
         };
 
         var attr = function (name, value) {
-            var parser = new DataBind.Parser(fireValueChangedForAllDependencies, this);
+            var parser = new DataBind.Parser(attrs, fireValueChangedForAllDependencies, this);
 
-            parser.attr(attrs, name, value);
+            parser.attr(name, value);
         };
 
         var get = function (expr) {
-            var parser = new DataBind.Parser(fireValueChangedForAllDependencies, this);
+            var parser = new DataBind.Parser(attrs, fireValueChangedForAllDependencies, this);
 
-            return parser.get(expr, undefined, undefined, attrs);
+            return parser.get(expr);
         };
 
         var fireValueChangedForAllDependencies = function (name) {

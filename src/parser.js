@@ -1,7 +1,7 @@
 var DataBind = (function (dataBind) {
     "use strict";
 
-    dataBind.Parser = function(fireValueChangedForAllDependencies, context) {
+    dataBind.Parser = function(attrs, fireValueChangedForAllDependencies, context) {
         var checkWrapArray = function (name, object) {
             return Array.isArray(object)
                 ? new DataBind.Collection(name, object, fireValueChangedForAllDependencies)
@@ -67,7 +67,7 @@ var DataBind = (function (dataBind) {
                 : attrs[capture];
         };
 
-        var get = function(name, object, fullName, attrs) {
+        var get = function(name, object, fullName) {
             fullName = fullName || name;
 
             if (/^\d+$/.test(name)) {
@@ -93,12 +93,12 @@ var DataBind = (function (dataBind) {
 
                     if (object !== undefined) {
                         if (prop === '') {
-                            return get.call(context, rest, object[index], fullName, attrs);
+                            return get.call(context, rest, object[index], fullName);
                         }
-                        return get.call(context, rest, eval('object.' + prop)[index], fullName, attrs);
+                        return get.call(context, rest, eval('object.' + prop)[index], fullName);
                     }
 
-                    return get.call(context, rest, attrs[prop][index], fullName, attrs);
+                    return get.call(context, rest, attrs[prop][index], fullName);
                 }
             }
 
@@ -107,7 +107,7 @@ var DataBind = (function (dataBind) {
                     return checkWrapArray(fullName, object);
                 }
 
-                return get.call(context, rest, eval('object.' + dotPieces[0]), fullName, attrs);
+                return get.call(context, rest, eval('object.' + dotPieces[0]), fullName);
             }
 
             if (dotPieces.length === 1) {
@@ -121,10 +121,10 @@ var DataBind = (function (dataBind) {
                 ? attrs[parseFuncResult.name].apply(context, parseFuncResult.args)
                 : attrs[dotPieces[0]];
 
-            return get.call(context, rest, thisObject, fullName, attrs);
+            return get.call(context, rest, thisObject, fullName);
         };
 
-        var attr = function (attrs, name, value, object, fullName, changedCollections) {
+        var attr = function (name, value, object, fullName, changedCollections) {
             fullName = fullName || name;
             changedCollections = changedCollections || [];
 
@@ -147,17 +147,17 @@ var DataBind = (function (dataBind) {
                             fireValueChangedForAllDependencies(fullName);
                             fireValueChangedForAll(changedCollections);
                         } else {
-                            attr(attrs, rest, value, object[index], fullName, changedCollections);
+                            attr(rest, value, object[index], fullName, changedCollections);
                         }
                     } else {
-                        attr(attrs, rest, value, eval('object.' + prop)[index], fullName, changedCollections);
+                        attr(rest, value, eval('object.' + prop)[index], fullName, changedCollections);
                     }
                 } else if (dotPieces.length === 1) {
                     attrs[prop][index] = value;
                     fireValueChangedForAllDependencies(fullName);
                     fireValueChangedForAll(changedCollections);
                 } else {
-                    attr(attrs, rest, value, attrs[prop][index], fullName, changedCollections);
+                    attr(rest, value, attrs[prop][index], fullName, changedCollections);
                 }
             } else if (object !== undefined) {
                 if (dotPieces.length === 1) {
@@ -165,7 +165,7 @@ var DataBind = (function (dataBind) {
                     fireValueChangedForAllDependencies(fullName);
                     fireValueChangedForAll(changedCollections);
                 } else {
-                    attr(attrs, rest, value, eval('object.' + dotPieces[0]), fullName);
+                    attr(rest, value, eval('object.' + dotPieces[0]), fullName);
                 }
             } else if (dotPieces.length === 1) {
                 attrs[name] = value;
@@ -174,7 +174,7 @@ var DataBind = (function (dataBind) {
                 if (attrs[dotPieces[0]] === undefined) {
                     attrs[dotPieces[0]] = {};
                 }
-                attr(attrs, rest, value, attrs[dotPieces[0]], fullName);
+                attr(rest, value, attrs[dotPieces[0]], fullName);
             }
         };
 
