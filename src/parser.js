@@ -30,7 +30,7 @@ var DataBind = (function (dataBind) {
             return pieces;
         };
 
-        var parseFunctionCall = function (expression, attrs) {
+        var parseFunctionCall = function (expression) {
             var args = [];
             var functionName = expression;
 
@@ -46,7 +46,7 @@ var DataBind = (function (dataBind) {
                     : [];
 
                 argPieces.forEach(function (piece) {
-                    args.push(get.call(context, piece.trim(), undefined, undefined, attrs));
+                    args.push(get.call(context, piece.trim()));
                 });
             }
 
@@ -59,7 +59,7 @@ var DataBind = (function (dataBind) {
             return arrayAccessRegex.exec(name);
         };
 
-        var getIndex = function (capture, attrs) {
+        var getIndex = function (capture) {
             var intRegex = /^\d+$/;
 
             return intRegex.test(capture)
@@ -83,13 +83,13 @@ var DataBind = (function (dataBind) {
 
             var rest = dotPieces.slice(1, dotPieces.length).join('.');
 
-            var parseFuncResult = parseFunctionCall(dotPieces[0], attrs);
+            var parseFuncResult = parseFunctionCall(dotPieces[0]);
             if (!parseFuncResult.isMatch) {
                 var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
 
                 if (arrayIndexer !== null) {
                     var prop = dotPieces[0].substring(0, arrayIndexer.index);
-                    var index = getIndex(arrayIndexer[1], attrs);
+                    var index = getIndex(arrayIndexer[1]);
 
                     if (object !== undefined) {
                         if (prop === '') {
