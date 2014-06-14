@@ -1,7 +1,7 @@
 var DataBind = (function (dataBind) {
     "use strict";
 
-    dataBind.Parser = function(context, fireValueChangedForAllDependencies, lookupFunc, updateValueFunc) {
+    dataBind.Parser = function(fireValueChangedForAllDependencies, lookupFunc, updateValueFunc) {
         var checkWrapArray = function (name, object) {
             return Array.isArray(object)
                 ? new DataBind.Collection(name, object, fireValueChangedForAllDependencies)
@@ -46,7 +46,7 @@ var DataBind = (function (dataBind) {
                     : [];
 
                 argPieces.forEach(function (piece) {
-                    args.push(get.call(context, piece.trim()));
+                    args.push(get(piece.trim()));
                 });
             }
 
@@ -93,12 +93,12 @@ var DataBind = (function (dataBind) {
 
                     if (object !== undefined) {
                         if (prop === '') {
-                            return get.call(context, rest, object[index], fullName);
+                            return get(rest, object[index], fullName);
                         }
-                        return get.call(context, rest, eval('object.' + prop)[index], fullName);
+                        return get(rest, eval('object.' + prop)[index], fullName);
                     }
 
-                    return get.call(context, rest, lookupFunc(prop)[index], fullName);
+                    return get(rest, lookupFunc(prop)[index], fullName);
                 }
             }
 
@@ -107,21 +107,21 @@ var DataBind = (function (dataBind) {
                     return checkWrapArray(fullName, object);
                 }
 
-                return get.call(context, rest, eval('object.' + dotPieces[0]), fullName);
+                return get(rest, eval('object.' + dotPieces[0]), fullName);
             }
 
             if (dotPieces.length === 1) {
                 if (typeof lookupFunc(parseFuncResult.name) === 'function') {
-                    return lookupFunc(parseFuncResult.name).apply(context, parseFuncResult.args);
+                    return lookupFunc(parseFuncResult.name).apply(this, parseFuncResult.args);
                 }
                 return checkWrapArray(name, lookupFunc(name));
             }
 
             var thisObject = typeof lookupFunc(parseFuncResult.name) === 'function'
-                ? lookupFunc(parseFuncResult.name).apply(context, parseFuncResult.args)
+                ? lookupFunc(parseFuncResult.name).apply(this, parseFuncResult.args)
                 : lookupFunc(dotPieces[0]);
 
-            return get.call(context, rest, thisObject, fullName);
+            return get(rest, thisObject, fullName);
         };
 
         var attr = function (name, value, object, fullName, changedCollections) {

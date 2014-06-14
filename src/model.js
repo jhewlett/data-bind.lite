@@ -5,7 +5,7 @@ var DataBind = (function (dataBind) {
         var attrs = {};
         var dependsOn = {};
         var valueChangedListeners = [];
-        var parser = new DataBind.Parser(this, fireValueChangedForAllDependencies, doLookup, updateValue);
+        var parser = new DataBind.Parser(fireValueChangedForAllDependencies, doLookup, updateValue);
 
         function doLookup(name) {
             return attrs[name];
@@ -20,7 +20,6 @@ var DataBind = (function (dataBind) {
         };
 
         var get = function (expr) {
-            var parser = new DataBind.Parser(this, fireValueChangedForAllDependencies, doLookup, updateValue);
             return parser.get(expr);
         };
 
