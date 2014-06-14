@@ -466,7 +466,7 @@ var DataBind = (function (dataBind) {
                         if (prop === '') {
                             return get(rest, object[index], fullName);
                         }
-                        return get(rest, eval('object.' + prop)[index], fullName);
+                        return get(rest, object[prop][index], fullName);
                     }
 
                     return get(rest, lookupFunc(prop)[index], fullName);
@@ -478,7 +478,7 @@ var DataBind = (function (dataBind) {
                     return checkWrapArray(fullName, object);
                 }
 
-                return get(rest, eval('object.' + dotPieces[0]), fullName);
+                return get(rest, object[dotPieces[0]], fullName);
             }
 
             if (dotPieces.length === 1) {
@@ -521,7 +521,7 @@ var DataBind = (function (dataBind) {
                             attr(rest, value, object[index], fullName, changedCollections);
                         }
                     } else {
-                        attr(rest, value, eval('object.' + prop)[index], fullName, changedCollections);
+                        attr(rest, value, object[prop][index], fullName, changedCollections);
                     }
                 } else if (dotPieces.length === 1) {
                     lookupFunc(prop)[index] = value;
@@ -536,7 +536,7 @@ var DataBind = (function (dataBind) {
                     fireValueChangedForAllDependencies(fullName);
                     fireValueChangedForAll(changedCollections);
                 } else {
-                    attr(rest, value, eval('object.' + dotPieces[0]), fullName);
+                    attr(rest, value, object[dotPieces[0]], fullName);
                 }
             } else if (dotPieces.length === 1) {
                 updateValueFunc(name, value);
