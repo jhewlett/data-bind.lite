@@ -4,8 +4,7 @@ var DataBind = (function (dataBind) {
     dataBind.Model = function (scope) {
         var attrs = {};
         var dependsOn = {};
-        var valueChanged = function (name) {
-        };
+        var valueChangedListeners = [];
 
         var attr = function (name, value) {
             var parser = new DataBind.Parser(attrs, fireValueChangedForAllDependencies, this);
@@ -20,7 +19,9 @@ var DataBind = (function (dataBind) {
         };
 
         var fireValueChangedForAllDependencies = function (name) {
-            valueChanged(name);
+            valueChangedListeners.forEach(function(listener) {
+                listener(name);
+            });
 
             if (dependsOn.hasOwnProperty(name)) {
                 dependsOn[name].forEach(function (dependency) {
@@ -56,8 +57,8 @@ var DataBind = (function (dataBind) {
             dependsOn[dependency].push(name);
         };
 
-        var setValueChanged = function (callback) {
-            valueChanged = callback;
+        var addValueChangedListener = function(callback) {
+            valueChangedListeners.push(callback);
         };
 
         return {
@@ -66,8 +67,8 @@ var DataBind = (function (dataBind) {
             computed: computed,
             action: action,
             scope: scope,
-            setValueChanged: setValueChanged,
-            call: function(actionExpr) { get(actionExpr); }
+            addValueChangedListener: addValueChangedListener,
+            invoke: function(actionExpr) { get(actionExpr); }
         };
     };
 

@@ -10,20 +10,18 @@ describe('model', function() {
     });
 
     describe('call function', function() {
-        describe('identifier exists', function() {
-            var actionSpy;
-            beforeEach(function() {
-                actionSpy = sinon.spy();
-                model.action('doSomething', actionSpy);
-                model.attr('arg', 1);
-            });
+        var actionSpy;
+        beforeEach(function() {
+            actionSpy = sinon.spy();
+            model.action('doSomething', actionSpy);
+            model.attr('arg', 1);
+        });
 
-            it('should invoke the action', function() {
-                model.call('doSomething(arg, 2, "literal")');
-
-                expect(actionSpy.calledOnce).toBeTruthy();
-                expect(actionSpy.calledWith(1, 2, "literal")).toBeTruthy();
-            });
+        it('should invoke the action', function() {
+	    model.invoke('doSomething(arg, 2, "literal")');
+            
+            expect(actionSpy.calledOnce).toBeTruthy();
+            expect(actionSpy.calledWith(1, 2, "literal")).toBeTruthy();
         });
     });
 
@@ -32,7 +30,7 @@ describe('model', function() {
         beforeEach(function() {
             valueChanged = sinon.spy();
             model.attr('items', [0]);
-            model.setValueChanged(valueChanged);
+            model.addValueChangedListener(valueChanged);
         });
 
         it('should update value in array', function() {
@@ -64,7 +62,7 @@ describe('model', function() {
         beforeEach(function() {
             valueChanged = sinon.spy();
             model.attr('arr', [0]);
-            model.setValueChanged(valueChanged);
+            model.addValueChangedListener(valueChanged);
 
             model.get('arr').push(1);
         });
@@ -83,7 +81,7 @@ describe('model', function() {
         beforeEach(function() {
             valueChanged = sinon.spy();
             model.attr('arr', {inner: [1]});
-            model.setValueChanged(valueChanged);
+            model.addValueChangedListener(valueChanged);
 
             model.get('arr.inner').push(2);
         });
@@ -103,7 +101,7 @@ describe('model', function() {
         beforeEach(function() {
             valueChanged = sinon.spy();
             model.attr('object', {firstName: ''});
-            model.setValueChanged(valueChanged);
+            model.addValueChangedListener(valueChanged);
         });
 
         it('should update property on object', function() {
@@ -119,7 +117,7 @@ describe('model', function() {
         beforeEach(function() {
             valueChanged = sinon.spy();
             model.attr('object', {items: [{firstName: ''}]});
-            model.setValueChanged(valueChanged);
+            model.addValueChangedListener(valueChanged);
         });
 
         it('should update property on object', function() {
@@ -135,7 +133,7 @@ describe('model', function() {
         beforeEach(function() {
             valueChanged = sinon.spy();
             model.attr('items', [[0, 1], [2, 3]]);
-            model.setValueChanged(valueChanged);
+            model.addValueChangedListener(valueChanged);
         });
 
         it('should set the individual item', function() {
@@ -150,7 +148,7 @@ describe('model', function() {
         beforeEach(function() {
             valueChanged = sinon.spy();
             model.attr('items', [[[0, 1]]]);
-            model.setValueChanged(valueChanged);
+            model.addValueChangedListener(valueChanged);
         });
 
         it('should set the individual item', function() {
@@ -241,7 +239,7 @@ describe('model', function() {
                 return this.get("b");
             });
 
-            model.setValueChanged(valueChanged);
+            model.addValueChangedListener(valueChanged);
 
             model.attr('a', 2);
         });
@@ -282,7 +280,7 @@ describe('model', function() {
             model.attr('items', [{completed: false}]);
 
             valueChanged = sinon.spy();
-            model.setValueChanged(valueChanged);
+            model.addValueChangedListener(valueChanged);
 
             model.attr('items[0].completed', true);
         });
@@ -299,7 +297,7 @@ describe('model', function() {
             model.attr('items', [{subItems: [{completed: false}]}]);
 
             valueChanged = sinon.spy();
-            model.setValueChanged(valueChanged);
+            model.addValueChangedListener(valueChanged);
 
             model.attr('items[0].subItems[0].completed', true);
         });
@@ -320,7 +318,7 @@ describe('model', function() {
             model.attr('items', [0]);
 
             valueChanged = sinon.spy();
-            model.setValueChanged(valueChanged);
+            model.addValueChangedListener(valueChanged);
 
             model.attr('items[0]', 1);
         });
@@ -341,7 +339,7 @@ describe('model', function() {
                 return this.get('items[0]');
             }, ['items']);
 
-            model.setValueChanged(valueChanged);
+            model.addValueChangedListener(valueChanged);
 
             model.get('items').push(1);
         });

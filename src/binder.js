@@ -7,7 +7,7 @@ var DataBind = (function (dataBind) {
         var currentValue = {};
         var foreach = {};
 
-        model.setValueChanged(valueChangedHandler);
+        model.addValueChangedListener(valueChangedHandler);
 
         function valueChangedHandler(name) {
             var foreachElements = scopeElement.querySelectorAll('[data-foreach$="in ' + name + '"]');
