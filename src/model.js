@@ -237,7 +237,7 @@ var DataBind = (function (dataBind) {
             action: action,
             scope: scope,
             setValueChanged: setValueChanged,
-            call: function(actionExpr) { get(actionExpr); }
+            invoke: function(actionExpr) { get(actionExpr); }
         };
     };
 

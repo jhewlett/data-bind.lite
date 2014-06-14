@@ -10,20 +10,18 @@ describe('model', function() {
     });
 
     describe('call function', function() {
-        describe('identifier exists', function() {
-            var actionSpy;
-            beforeEach(function() {
-                actionSpy = sinon.spy();
-                model.action('doSomething', actionSpy);
-                model.attr('arg', 1);
-            });
+        var actionSpy;
+        beforeEach(function() {
+            actionSpy = sinon.spy();
+            model.action('doSomething', actionSpy);
+            model.attr('arg', 1);
+        });
 
-            it('should invoke the action', function() {
-                model.call('doSomething(arg, 2, "literal")');
+        it('should invoke the action', function() {
+            model.invoke('doSomething(arg, 2, "literal")');
 
-                expect(actionSpy.calledWith(1, 2, "literal")).toBeTruthy();
-                expect(actionSpy.calledOnce).toBeTruthy();
-            });
+            expect(actionSpy.calledWith(1, 2, "literal")).toBeTruthy();
+            expect(actionSpy.calledOnce).toBeTruthy();
         });
     });
 
