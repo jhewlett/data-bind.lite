@@ -5,20 +5,26 @@ var DataBind = (function (dataBind) {
         var attrs = {};
         var dependsOn = {};
         var valueChangedListeners = [];
+        var parser = new DataBind.Parser(this, fireValueChangedForAllDependencies, doLookup, updateValue);
+
+        function doLookup(name) {
+            return attrs[name];
+        }
+
+        function updateValue(name, value) {
+            attrs[name] = value;
+        }
 
         var attr = function (name, value) {
-            var parser = new DataBind.Parser(attrs, fireValueChangedForAllDependencies, this);
-
             parser.attr(name, value);
         };
 
         var get = function (expr) {
-            var parser = new DataBind.Parser(attrs, fireValueChangedForAllDependencies, this);
-
+            var parser = new DataBind.Parser(this, fireValueChangedForAllDependencies, doLookup, updateValue);
             return parser.get(expr);
         };
 
-        var fireValueChangedForAllDependencies = function (name) {
+        function fireValueChangedForAllDependencies(name) {
             valueChangedListeners.forEach(function(listener) {
                 listener(name);
             });
@@ -28,7 +34,7 @@ var DataBind = (function (dataBind) {
                     fireValueChangedForAllDependencies(dependency);
                 });
             }
-        };
+        }
 
         var computed = function (name, func, explicitDependencies) {
             if (explicitDependencies) {

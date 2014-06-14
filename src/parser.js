@@ -1,7 +1,7 @@
 var DataBind = (function (dataBind) {
     "use strict";
 
-    dataBind.Parser = function(attrs, fireValueChangedForAllDependencies, context) {
+    dataBind.Parser = function(context, fireValueChangedForAllDependencies, lookupFunc, updateValueFunc) {
         var checkWrapArray = function (name, object) {
             return Array.isArray(object)
                 ? new DataBind.Collection(name, object, fireValueChangedForAllDependencies)
@@ -64,7 +64,7 @@ var DataBind = (function (dataBind) {
 
             return intRegex.test(capture)
                 ? parseInt(capture)
-                : attrs[capture];
+                : lookupFunc(capture);
         };
 
         var get = function(name, object, fullName) {
@@ -98,7 +98,7 @@ var DataBind = (function (dataBind) {
                         return get.call(context, rest, eval('object.' + prop)[index], fullName);
                     }
 
-                    return get.call(context, rest, attrs[prop][index], fullName);
+                    return get.call(context, rest, lookupFunc(prop)[index], fullName);
                 }
             }
 
@@ -111,15 +111,15 @@ var DataBind = (function (dataBind) {
             }
 
             if (dotPieces.length === 1) {
-                if (typeof attrs[parseFuncResult.name] === 'function') {
-                    return attrs[parseFuncResult.name].apply(context, parseFuncResult.args);
+                if (typeof lookupFunc(parseFuncResult.name) === 'function') {
+                    return lookupFunc(parseFuncResult.name).apply(context, parseFuncResult.args);
                 }
-                return checkWrapArray(name, attrs[name]);
+                return checkWrapArray(name, lookupFunc(name));
             }
 
-            var thisObject = typeof attrs[parseFuncResult.name] === 'function'
-                ? attrs[parseFuncResult.name].apply(context, parseFuncResult.args)
-                : attrs[dotPieces[0]];
+            var thisObject = typeof lookupFunc(parseFuncResult.name) === 'function'
+                ? lookupFunc(parseFuncResult.name).apply(context, parseFuncResult.args)
+                : lookupFunc(dotPieces[0]);
 
             return get.call(context, rest, thisObject, fullName);
         };
@@ -153,11 +153,11 @@ var DataBind = (function (dataBind) {
                         attr(rest, value, eval('object.' + prop)[index], fullName, changedCollections);
                     }
                 } else if (dotPieces.length === 1) {
-                    attrs[prop][index] = value;
+                    lookupFunc(prop)[index] = value;
                     fireValueChangedForAllDependencies(fullName);
                     fireValueChangedForAll(changedCollections);
                 } else {
-                    attr(rest, value, attrs[prop][index], fullName, changedCollections);
+                    attr(rest, value, lookupFunc(prop)[index], fullName, changedCollections);
                 }
             } else if (object !== undefined) {
                 if (dotPieces.length === 1) {
@@ -168,13 +168,13 @@ var DataBind = (function (dataBind) {
                     attr(rest, value, eval('object.' + dotPieces[0]), fullName);
                 }
             } else if (dotPieces.length === 1) {
-                attrs[name] = value;
+                updateValueFunc(name, value);
                 fireValueChangedForAllDependencies(name);
             } else {
-                if (attrs[dotPieces[0]] === undefined) {
-                    attrs[dotPieces[0]] = {};
+                if (lookupFunc(dotPieces[0]) === undefined) {
+                    updateValueFunc(dotPieces[0], {});
                 }
-                attr(rest, value, attrs[dotPieces[0]], fullName);
+                attr(rest, value, lookupFunc(dotPieces[0]), fullName);
             }
         };
 
