@@ -110,7 +110,7 @@ var DataBind = (function (dataBind) {
 
             element.onkeydown = function (event) {
                 if (event.which === 13) {
-                    model.get(expression);
+                    model.invoke(expression);
                 }
             };
         };
@@ -193,7 +193,7 @@ var DataBind = (function (dataBind) {
             var expression = element.getAttribute('data-click');
 
             element.onclick = function () {
-                model.get(expression);
+                model.invoke(expression);
             };
         };
 
