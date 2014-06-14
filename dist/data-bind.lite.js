@@ -7,7 +7,7 @@ var DataBind = (function (dataBind) {
         var currentValue = {};
         var foreach = {};
 
-        model.setValueChanged(valueChangedHandler);
+        model.addValueChangedListener(valueChangedHandler);
 
         function valueChangedHandler(name) {
             var foreachElements = scopeElement.querySelectorAll('[data-foreach$="in ' + name + '"]');
@@ -254,8 +254,7 @@ var DataBind = (function (dataBind) {
     dataBind.Model = function (scope) {
         var attrs = {};
         var dependsOn = {};
-        var valueChanged = function (name) {
-        };
+        var valueChangedListeners = [];
 
         var getArrayIndexerMatch = function (name) {
             var arrayAccessRegex = /\[([^\]]+)\]/;
@@ -432,7 +431,9 @@ var DataBind = (function (dataBind) {
         };
 
         var fireValueChangedForAllDependencies = function (name) {
-            valueChanged(name);
+            valueChangedListeners.forEach(function(listener) {
+                listener(name);
+            });
 
             if (dependsOn.hasOwnProperty(name)) {
                 dependsOn[name].forEach(function (dependency) {
@@ -468,8 +469,8 @@ var DataBind = (function (dataBind) {
             dependsOn[dependency].push(name);
         };
 
-        var setValueChanged = function (callback) {
-            valueChanged = callback;
+        var addValueChangedListener = function(callback) {
+            valueChangedListeners.push(callback);
         };
 
         var getIndex = function (capture) {
@@ -486,8 +487,8 @@ var DataBind = (function (dataBind) {
             computed: computed,
             action: action,
             scope: scope,
-            setValueChanged: setValueChanged,
-            call: function(actionExpr) { get(actionExpr); }
+            addValueChangedListener: addValueChangedListener,
+            invoke: function(actionExpr) { get(actionExpr); }
         };
     };
 
