@@ -18,6 +18,7 @@ module.exports = function(config) {
       '../src/model.js',
       '../src/binder.js',
       '../src/collection.js',
+      '../src/lexer.js',
       '../lib/lexer.js',
       'model-specs.js',
       'binder-specs.js',

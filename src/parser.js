@@ -2,19 +2,6 @@ var DataBind = (function (dataBind) {
     "use strict";
 
     dataBind.Parser = function(fireValueChangedForAllDependencies, lookupFunc, updateValueFunc) {
-        var rules = {root: [
-            [/\[/, 'LBRACK'],
-            [/\]/, 'RBRACK'],
-            [/[(]/, 'LPAREN'],
-            [/[)]/, 'RPAREN'],
-            [/,/, 'COMMA'],
-            [/['][^']*[']/, 'LITERAL'],
-            [/["][^"]*["]/, 'LITERAL'],
-            [/[a-zA-Z][a-zA-Z0-9]*/, 'ID'],    //todo: allow more id characters
-            [/[0-9]+/, 'NUMBER'],
-            [/[.]/, 'DOT'],
-            [/\s+/, TokenJS.Ignore],  //ignore whitespace
-        ]};
 
         var checkWrapArray = function (name, object) {
             return Array.isArray(object)
@@ -39,29 +26,6 @@ var DataBind = (function (dataBind) {
             return pieces;
         };
 
-        var parseFunctionCall = function (expression) {
-            var args = [];
-            var functionName = expression;
-
-            var argsRegex = /[(][^)]*[)]/;
-            var match = argsRegex.exec(expression);
-            if (match !== null) {
-                functionName = expression.substring(0, match.index);
-
-                var commaSeparatedArgs = match[0].replace('(', '').replace(')', '');
-
-                var argPieces = commaSeparatedArgs.length > 0
-                    ? commaSeparatedArgs.split(',')
-                    : [];
-
-                argPieces.forEach(function (piece) {
-                    args.push(get(piece.trim()));
-                });
-            }
-
-            return {name: functionName, args: args, isMatch: match !== null };
-        };
-
         var getArrayIndexerMatch = function (name) {
             var arrayAccessRegex = /\[([^\]]+)\]/;
 
@@ -76,62 +40,71 @@ var DataBind = (function (dataBind) {
                 : lookupFunc(capture);
         };
 
-        var get = function(name) {
-            var lexer = new TokenJS.Lexer(name, rules, false);
+        var parseFunction = function(lexer, context) {
+            var functionName = lexer.currentToken().text;
 
-            var token = lexer.getNextToken();
-            var object;
-            while (token !== TokenJS.EndOfStream) {
-                if (token.token === 'NUMBER') {
-                    return parseInt(token.text);
-                }
-                if (token.token === 'LITERAL') {
-                    return token.text.replace(/'/g, '').replace(/"/g, "");
-                }
+            lexer.consume();
+            var args = [];
 
-                if (token.token === 'ID') {
-                    if (typeof lookupFunc(token.text) === 'function') {
-                        var functionName = token.text;
-
-                        token = lexer.getNextToken();
-                        var args = [];
-
-                        if (token.token === 'LPAREN') {
-                            token = lexer.getNextToken();
-                            var argText = '';
-                            while(token !== TokenJS.EndOfStream && token.token !== 'RPAREN') {
-                                if (token.token === 'COMMA') {
-                                    args.push(get(argText));
-                                    argText = '';
-                                } else {
-                                    argText += token.text;
-                                }
-                                token = lexer.getNextToken();
-                            }
-
-                            if (token.token === 'RPAREN' && argText) {
-                                args.push(get(argText));
-                            }
-                        }
-
-                        object = lookupFunc(functionName).apply(this, args);
+            if (lexer.currentToken().token === 'LPAREN') {
+                lexer.consume();
+                var argText = '';
+                while(lexer.hasNextToken() && lexer.currentToken().token !== 'RPAREN') {
+                    if (lexer.currentToken().token === 'COMMA') {
+                        args.push(get(argText));
+                        argText = '';
                     } else {
-                        var id = token.text;
+                        argText += lexer.currentToken().text;
+                    }
+                    lexer.consume();
+                }
 
-                        token = lexer.getNextToken();
+                if (lexer.currentToken().token === 'RPAREN' && argText) {
+                    args.push(get(argText));
+                }
+            }
 
-                        if (token.token === 'DOT') {
-                            token = lexer.getNextToken();
+            return lookupFunc(functionName).apply(context, args);
+        };
 
-                            if (object) {
-                                object = object[lookupFunc(id)[token.text]];
-                            } else {
-                                object = lookupFunc(id)[token.text];
-                            }
-                        } else if (token.token === 'LBRACK') {
-                            token = lexer.getNextToken();
+        var parseProperty = function(lexer, id, object) {
+            lexer.consume();
 
-                            var index = getIndex(token.text);
+            if (object) {
+                return object[lookupFunc(id)[lexer.currentToken().text]];
+            }
+
+            return lookupFunc(id)[lexer.currentToken().text];
+        };
+
+        var get = function(name) {
+            var lexer = new DataBind.Lexer(name);
+
+            var object = null;
+
+            while (lexer.hasNextToken()) {
+                lexer.consume();
+                if (lexer.currentToken().token === 'NUMBER') {
+                    return parseInt(lexer.currentToken().text);
+                }
+                if (lexer.currentToken().token === 'LITERAL') {
+                    return lexer.currentToken().text.replace(/'/g, '').replace(/"/g, "");
+                }
+
+                if (lexer.currentToken().token === 'ID') {
+                    if (typeof lookupFunc(lexer.currentToken().text) === 'function') {
+                        object = parseFunction(lexer, this);
+                    } else {
+                        var id = lexer.currentToken().text;
+
+                        lexer.consume();
+
+                        if (lexer.currentToken().token === 'DOT') {
+                            object = parseProperty(lexer, id, object);
+                        } else if (lexer.currentToken().token === 'LBRACK') {
+                            lexer.consume();
+
+                            var index = getIndex(lexer.currentToken().text);
 
                             object = lookupFunc(id)[index];
                         } else {
@@ -140,60 +113,18 @@ var DataBind = (function (dataBind) {
                     }
                 }
 
-                if (token.token === 'DOT') {
-                    token = lexer.getNextToken();
+                if (lexer.currentToken().token === 'DOT') {
+                    lexer.consume();
 
-                    object = object[token.text];
-                } else if (token.token === 'LBRACK') {
-                    token = lexer.getNextToken();
+                    object = object[lexer.currentToken().text];
+                } else if (lexer.currentToken().token === 'LBRACK') {
+                    lexer.consume();
 
-                    object = object[getIndex(token.text)];
+                    object = object[getIndex(lexer.currentToken().text)];
                 }
-
-                token = lexer.getNextToken();
             }
 
             return checkWrapArray(name, object);
-//
-//            var parseFuncResult = parseFunctionCall(dotPieces[0]);
-//            if (!parseFuncResult.isMatch) {
-//                var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
-//
-//                if (arrayIndexer !== null) {
-//                    var prop = dotPieces[0].substring(0, arrayIndexer.index);
-//                    var index = getIndex(arrayIndexer[1]);
-//
-//                    if (object !== undefined) {
-//                        if (prop === '') {
-//                            return get(rest, object[index], fullName);
-//                        }
-//                        return get(rest, object[prop][index], fullName);
-//                    }
-//
-//                    return get(rest, lookupFunc(prop)[index], fullName);
-//                }
-//            }
-//
-//            if (object !== undefined) {
-//                if (dotPieces[0] === '') {
-//                    return checkWrapArray(fullName, object);
-//                }
-//
-//                return get(rest, object[dotPieces[0]], fullName);
-//            }
-//
-//            if (dotPieces.length === 1) {
-//                if (typeof lookupFunc(parseFuncResult.name) === 'function') {
-//                    return lookupFunc(parseFuncResult.name).apply(this, parseFuncResult.args);
-//                }
-//                return checkWrapArray(name, lookupFunc(name));
-//            }
-//
-//            var thisObject = typeof lookupFunc(parseFuncResult.name) === 'function'
-//                ? lookupFunc(parseFuncResult.name).apply(this, parseFuncResult.args)
-//                : lookupFunc(dotPieces[0]);
-//
-//            return get(rest, thisObject, fullName);
         };
 
         var attr = function (name, value, object, fullName, changedCollections) {

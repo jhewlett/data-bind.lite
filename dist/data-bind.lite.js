@@ -373,15 +373,11 @@ var DataBind = (function (dataBind) {
     "use strict";
 
     dataBind.Parser = function(fireValueChangedForAllDependencies, lookupFunc, updateValueFunc) {
+
         var checkWrapArray = function (name, object) {
             return Array.isArray(object)
                 ? new DataBind.Collection(name, object, fireValueChangedForAllDependencies)
                 : object;
-        };
-
-        var checkForStringLiteral = function(name) {
-            var stringLiteralRegex = /^['"]([^'"]*)['"]$/;
-            return stringLiteralRegex.exec(name);
         };
 
         var tokenize = function(name) {
@@ -401,29 +397,6 @@ var DataBind = (function (dataBind) {
             return pieces;
         };
 
-        var parseFunctionCall = function (expression) {
-            var args = [];
-            var functionName = expression;
-
-            var argsRegex = /[(][^)]*[)]/;
-            var match = argsRegex.exec(expression);
-            if (match !== null) {
-                functionName = expression.substring(0, match.index);
-
-                var commaSeparatedArgs = match[0].replace('(', '').replace(')', '');
-
-                var argPieces = commaSeparatedArgs.length > 0
-                    ? commaSeparatedArgs.split(',')
-                    : [];
-
-                argPieces.forEach(function (piece) {
-                    args.push(get(piece.trim()));
-                });
-            }
-
-            return {name: functionName, args: args, isMatch: match !== null };
-        };
-
         var getArrayIndexerMatch = function (name) {
             var arrayAccessRegex = /\[([^\]]+)\]/;
 
@@ -438,61 +411,91 @@ var DataBind = (function (dataBind) {
                 : lookupFunc(capture);
         };
 
-        var get = function(name, object, fullName) {
-            fullName = fullName || name;
+        var parseFunction = function(lexer, context) {
+            var functionName = lexer.currentToken().text;
 
-            if (/^\d+$/.test(name)) {
-                return parseInt(name);
-            }
+            lexer.consume();
+            var args = [];
 
-            var stringLiteralMatch = checkForStringLiteral(name);
-            if (stringLiteralMatch !== null) {
-                return stringLiteralMatch[1];
-            }
-
-            var dotPieces = tokenize(name);
-
-            var rest = dotPieces.slice(1, dotPieces.length).join('.');
-
-            var parseFuncResult = parseFunctionCall(dotPieces[0]);
-            if (!parseFuncResult.isMatch) {
-                var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
-
-                if (arrayIndexer !== null) {
-                    var prop = dotPieces[0].substring(0, arrayIndexer.index);
-                    var index = getIndex(arrayIndexer[1]);
-
-                    if (object !== undefined) {
-                        if (prop === '') {
-                            return get(rest, object[index], fullName);
-                        }
-                        return get(rest, object[prop][index], fullName);
+            if (lexer.currentToken().token === 'LPAREN') {
+                lexer.consume();
+                var argText = '';
+                while(lexer.hasNextToken() && lexer.currentToken().token !== 'RPAREN') {
+                    if (lexer.currentToken().token === 'COMMA') {
+                        args.push(get(argText));
+                        argText = '';
+                    } else {
+                        argText += lexer.currentToken().text;
                     }
+                    lexer.consume();
+                }
 
-                    return get(rest, lookupFunc(prop)[index], fullName);
+                if (lexer.currentToken().token === 'RPAREN' && argText) {
+                    args.push(get(argText));
                 }
             }
 
-            if (object !== undefined) {
-                if (dotPieces[0] === '') {
-                    return checkWrapArray(fullName, object);
-                }
+            return lookupFunc(functionName).apply(context, args);
+        };
 
-                return get(rest, object[dotPieces[0]], fullName);
+        var parseProperty = function(lexer, id, object) {
+            lexer.consume();
+
+            if (object) {
+                return object[lookupFunc(id)[lexer.currentToken().text]];
             }
 
-            if (dotPieces.length === 1) {
-                if (typeof lookupFunc(parseFuncResult.name) === 'function') {
-                    return lookupFunc(parseFuncResult.name).apply(this, parseFuncResult.args);
+            return lookupFunc(id)[lexer.currentToken().text];
+        };
+
+        var get = function(name) {
+            var lexer = new DataBind.Lexer(name);
+
+            var object = null;
+
+            while (lexer.hasNextToken()) {
+                lexer.consume();
+                if (lexer.currentToken().token === 'NUMBER') {
+                    return parseInt(lexer.currentToken().text);
                 }
-                return checkWrapArray(name, lookupFunc(name));
+                if (lexer.currentToken().token === 'LITERAL') {
+                    return lexer.currentToken().text.replace(/'/g, '').replace(/"/g, "");
+                }
+
+                if (lexer.currentToken().token === 'ID') {
+                    if (typeof lookupFunc(lexer.currentToken().text) === 'function') {
+                        object = parseFunction(lexer, this);
+                    } else {
+                        var id = lexer.currentToken().text;
+
+                        lexer.consume();
+
+                        if (lexer.currentToken().token === 'DOT') {
+                            object = parseProperty(lexer, id, object);
+                        } else if (lexer.currentToken().token === 'LBRACK') {
+                            lexer.consume();
+
+                            var index = getIndex(lexer.currentToken().text);
+
+                            object = lookupFunc(id)[index];
+                        } else {
+                            object = checkWrapArray(id, lookupFunc(id));
+                        }
+                    }
+                }
+
+                if (lexer.currentToken().token === 'DOT') {
+                    lexer.consume();
+
+                    object = object[lexer.currentToken().text];
+                } else if (lexer.currentToken().token === 'LBRACK') {
+                    lexer.consume();
+
+                    object = object[getIndex(lexer.currentToken().text)];
+                }
             }
 
-            var thisObject = typeof lookupFunc(parseFuncResult.name) === 'function'
-                ? lookupFunc(parseFuncResult.name).apply(this, parseFuncResult.args)
-                : lookupFunc(dotPieces[0]);
-
-            return get(rest, thisObject, fullName);
+            return checkWrapArray(name, object);
         };
 
         var attr = function (name, value, object, fullName, changedCollections) {
@@ -563,3 +566,205 @@ var DataBind = (function (dataBind) {
 
     return dataBind;
 }(DataBind || {}));
+
+var DataBind = (function (dataBind) {
+    "use strict";
+
+    dataBind.Lexer = function(expr) {
+        var rules = {root: [
+            [/\[/, 'LBRACK'],
+            [/\]/, 'RBRACK'],
+            [/[(]/, 'LPAREN'],
+            [/[)]/, 'RPAREN'],
+            [/,/, 'COMMA'],
+            [/['][^']*[']/, 'LITERAL'],
+            [/["][^"]*["]/, 'LITERAL'],
+            [/[a-zA-Z][a-zA-Z0-9]*/, 'ID'],    //todo: allow more id characters
+            [/[0-9]+/, 'NUMBER'],
+            [/[.]/, 'DOT'],
+            [/\s+/, TokenJS.Ignore],  //ignore whitespace
+        ]};
+
+        var lexer = new TokenJS.Lexer(expr, rules, false);
+
+        var tokens = lexer.tokenize();
+
+        var i = -1;
+
+        var hasNextToken = function() {
+            return i < tokens.length - 1;
+        };
+
+        return {
+            currentToken: function() {
+                if (i < tokens.length)
+                    return tokens[i];
+                else
+                    return TokenJS.EndOfStream;
+            },
+            consume: function() { i++; },
+            hasNextToken: hasNextToken
+        };
+    };
+
+    return dataBind;
+}(DataBind || {}));
+
+var TokenJS = TokenJS || {};
+
+TokenJS.Ignore = {
+    toString: function() {
+        return 'Ignored rule';
+    }
+};
+
+TokenJS.EndOfStream = {
+    toString: function() {
+        return "End of token stream";
+    }
+};
+
+TokenJS.SyntaxError = function(message) {
+    this.name = "SyntaxError";
+    this.message = message;
+};
+
+TokenJS.StateError = function(message) {
+    this.name = "StateError";
+    this.message = message;
+};
+
+/**
+ * @param input: text to lex
+ * @param rules: dictionary of lexing rules. Must contain a 'root' state.
+ * @param ignoreAllUnrecognized: if true, ignores unrecognized characters instead of throwing an error
+ */
+ TokenJS.Lexer = function(input, rules, ignoreUnrecognized){
+    var _rules = rules;
+    var _currentState;
+    var _input = input;
+    var _index = 0;
+    var _ignoreUnrecognized = ignoreUnrecognized;
+
+    var state = function(newState) {
+        if (!_rules.hasOwnProperty(newState)) {
+            throw new TokenJS.StateError("Missing state: '" + newState + "'.");
+        }
+        _currentState = newState;
+    };
+
+    state('root');
+
+    var getNextToken = function() {
+        if (_index >= _input.length) {
+            return TokenJS.EndOfStream;
+        }
+
+        var oldState = _currentState;
+
+        var allMatches = getAllMatches();
+
+        for (var i = 0; i < allMatches.length; i++) {
+            var bestMatch = allMatches[i];
+            if (typeof bestMatch.value === 'function') {
+                var returnValue = bestMatch.value.call(callbackContext, bestMatch.matchText);
+                if (returnValue === TokenJS.Ignore) {
+                    consume(bestMatch.matchText);
+                    return getNextToken();
+                } else if (hasValue(returnValue)) {
+                    consume(bestMatch.matchText);
+                    return {text: bestMatch.matchText, token: returnValue, index: bestMatch.index};
+                } else if (changedStateWithoutReturningToken(oldState)) {
+                    throwSyntaxError();
+                }
+            } else {
+                consume(bestMatch.matchText);
+                if (bestMatch.value === TokenJS.Ignore) {
+                    return getNextToken();
+                } else {
+                    return {text: bestMatch.matchText, token: bestMatch.value, index: bestMatch.index};
+                }
+            }
+        }
+
+        if (_ignoreUnrecognized) {
+            _index += 1;
+            return getNextToken();
+        } else {
+            throwSyntaxError();
+        }
+    };
+
+    var getAllMatches = function () {
+        var allMatches = [];
+
+        var currentRules = _rules[_currentState];
+        for (var i = 0; i < currentRules.length; i++) {
+            var regex = currentRules[i][0];
+
+            var match = regex.exec(_input.substring(_index));
+
+            if (match && match.index === 0) {
+                allMatches.push({matchText: match[0], value: currentRules[i][1], index: _index});
+            }
+        }
+        sortByLongestMatchDescending(allMatches);
+
+        return allMatches;
+    };
+
+    var sortByLongestMatchDescending = function(allMatches) {
+        allMatches.sort(function (a, b) {
+            if (a.matchText.length < b.matchText.length) {
+                return 1;
+            } else if (a.matchText.length > b.matchText.length) {
+                return -1;
+            }
+            return 0;
+        });
+    };
+
+    var changedStateWithoutReturningToken = function(oldState) {
+        return _currentState !== oldState;
+    };
+
+    var throwSyntaxError = function() {
+        throw new TokenJS.SyntaxError("Invalid character '" + _input[_index] + "' at index " + (_index + 1));
+    };
+
+    var consume = function(match) {
+        _index += match.length;
+    };
+
+    var reset = function() {
+        _index = 0;
+        _currentState = 'root';
+    };
+
+    var tokenize = function() {
+        reset();
+        var allTokens = [];
+        var token = getNextToken();
+        while (token !== TokenJS.EndOfStream) {
+            allTokens.push(token);
+            token = getNextToken();
+        }
+
+        return allTokens;
+    };
+
+    var hasValue = function(variable) {
+        return typeof variable !== 'undefined' && variable !== null;
+    };
+
+    var callbackContext = {
+        state: state
+    };
+
+    return {
+        getNextToken: getNextToken,
+        tokenize: tokenize,
+        state: state,
+        reset: reset
+    };
+};
