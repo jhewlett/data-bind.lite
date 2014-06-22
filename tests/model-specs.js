@@ -109,6 +109,7 @@ describe('model', function() {
 
             expect(model.get('object.firstName')).toEqual('john');
             expect(valueChanged.calledWith('object.firstName')).toBeTruthy();
+            expect(valueChanged.calledWith('object')).toBeFalsy();
         });
     });
 
@@ -290,7 +291,7 @@ describe('model', function() {
         })
     });
 
-    describe('modifying property on array item', function() {
+    describe('modifying property on inner array item', function() {
         var valueChanged;
 
         beforeEach(function() {
@@ -302,16 +303,16 @@ describe('model', function() {
             model.attr('items[0].subItems[0].completed', true);
         });
 
+        it('should set value', function() {
+            expect(model.get('items[0].subItems[0].completed')).toEqual(true);
+        });
+
         it('should trigger value changed for outer collection', function() {
             expect(valueChanged.calledWith('items')).toBeTruthy();
         });
-
-        it('should trigger value changed for inner collection', function() {
-            expect(valueChanged.calledWith('subItems')).toBeTruthy();
-        });
     });
 
-    describe('modifying property on array item', function() {
+    describe('modifying array item', function() {
         var valueChanged;
 
         beforeEach(function() {

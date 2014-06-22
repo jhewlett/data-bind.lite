@@ -77,6 +77,24 @@ var DataBind = (function (dataBind) {
             return lookupFunc(id)[lexer.currentToken().text];
         };
 
+        var parseId = function(lexer, object) {
+            var id = lexer.currentToken().text;
+
+            lexer.consume();
+
+            if (lexer.currentToken().token === 'DOT') {
+                return parseProperty(lexer, id, object);
+            } else if (lexer.currentToken().token === 'LBRACK') {
+                lexer.consume();
+
+                var index = getIndex(lexer.currentToken().text);
+
+                return lookupFunc(id)[index];
+            } else {
+                return checkWrapArray(id, lookupFunc(id));
+            }
+        };
+
         var get = function(name) {
             var lexer = new DataBind.Lexer(name);
 
@@ -88,28 +106,14 @@ var DataBind = (function (dataBind) {
                     return parseInt(lexer.currentToken().text);
                 }
                 if (lexer.currentToken().token === 'LITERAL') {
-                    return lexer.currentToken().text.replace(/'/g, '').replace(/"/g, "");
+                    return lexer.currentToken().text.slice(1, -1);
                 }
 
                 if (lexer.currentToken().token === 'ID') {
                     if (typeof lookupFunc(lexer.currentToken().text) === 'function') {
                         object = parseFunction(lexer, this);
                     } else {
-                        var id = lexer.currentToken().text;
-
-                        lexer.consume();
-
-                        if (lexer.currentToken().token === 'DOT') {
-                            object = parseProperty(lexer, id, object);
-                        } else if (lexer.currentToken().token === 'LBRACK') {
-                            lexer.consume();
-
-                            var index = getIndex(lexer.currentToken().text);
-
-                            object = lookupFunc(id)[index];
-                        } else {
-                            object = checkWrapArray(id, lookupFunc(id));
-                        }
+                        object = parseId(lexer, object);
                     }
                 }
 
@@ -127,57 +131,61 @@ var DataBind = (function (dataBind) {
             return checkWrapArray(name, object);
         };
 
-        var attr = function (name, value, object, fullName, changedCollections) {
-            fullName = fullName || name;
-            changedCollections = changedCollections || [];
+        var attr = function (name, value) {
+            var changedCollections = [];
+            var object = null;
 
-            var dotPieces = tokenize(name);
-            var rest = dotPieces.slice(1, dotPieces.length).join('.');
+            var lexer = new DataBind.Lexer(name);
 
-            var arrayIndexer = getArrayIndexerMatch(dotPieces[0]);
-            if (arrayIndexer !== null) {
-                var prop = dotPieces[0].substring(0, arrayIndexer.index);
-                var index = getIndex(arrayIndexer[1]);
+            while (lexer.hasNextToken()) {
+                lexer.consume();
 
-                if (prop !== '') {
-                    changedCollections.push(prop);
+                var id;
+                if (lexer.currentToken().token === 'ID') {
+                    id = lexer.currentToken().text;
+
+                    object = lookupFunc(id);
+                    lexer.consume();
+
+                    if (!lexer.hasNextToken()) {
+                        updateValueFunc(id, value);
+                        fireValueChangedForAllDependencies(id);
+                    }
                 }
 
-                if (object !== undefined) {
-                    if (prop === '') {
-                        if (dotPieces.length === 1) {
-                            object[index] = value;
-                            fireValueChangedForAllDependencies(fullName);
+                if (lexer.currentToken().token === 'LBRACK') {
+                    changedCollections.push(id);
+                    lexer.consume();
+
+                    var index = parseInt(lexer.currentToken().text);
+
+                    lexer.consume();    //RBRACK
+
+                    if (!lexer.hasNextToken()) {
+                        object[index] = value;
+
+                        fireValueChangedForAllDependencies(name);
+                        fireValueChangedForAll(changedCollections);
+                    } else {
+                        object = object[index];
+                    }
+                } else if (lexer.currentToken().token === 'DOT') {
+                    lexer.consume();
+
+                    if (!lexer.hasNextToken()) {
+                        if (object) {
+                            object[lexer.currentToken().text] = value;
+                            fireValueChangedForAllDependencies(name);
                             fireValueChangedForAll(changedCollections);
                         } else {
-                            attr(rest, value, object[index], fullName, changedCollections);
+                            var newObject = {};
+                            newObject[lexer.currentToken().text] = value;
+                            updateValueFunc(id, newObject);
                         }
-                    } else {
-                        attr(rest, value, object[prop][index], fullName, changedCollections);
+                    } else if (object) {
+                        object = object[lexer.currentToken().text];
                     }
-                } else if (dotPieces.length === 1) {
-                    lookupFunc(prop)[index] = value;
-                    fireValueChangedForAllDependencies(fullName);
-                    fireValueChangedForAll(changedCollections);
-                } else {
-                    attr(rest, value, lookupFunc(prop)[index], fullName, changedCollections);
                 }
-            } else if (object !== undefined) {
-                if (dotPieces.length === 1) {
-                    object[dotPieces[0]] = value;
-                    fireValueChangedForAllDependencies(fullName);
-                    fireValueChangedForAll(changedCollections);
-                } else {
-                    attr(rest, value, object[dotPieces[0]], fullName);
-                }
-            } else if (dotPieces.length === 1) {
-                updateValueFunc(name, value);
-                fireValueChangedForAllDependencies(name);
-            } else {
-                if (lookupFunc(dotPieces[0]) === undefined) {
-                    updateValueFunc(dotPieces[0], {});
-                }
-                attr(rest, value, lookupFunc(dotPieces[0]), fullName);
             }
         };
 
