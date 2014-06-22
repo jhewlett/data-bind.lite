@@ -9,29 +9,6 @@ var DataBind = (function (dataBind) {
                 : object;
         };
 
-        var tokenize = function(name) {
-            var pieces = name.split('.');
-            for(var i = 0; i < pieces.length; i++) {
-                var splitArr = pieces[i].indexOf('][');
-                if (splitArr >= 0) {
-                    var firstPart = pieces[i].substring(0, splitArr + 1);
-                    var secondPart = pieces[i].substring(splitArr + 1);
-
-                    pieces.splice(i, 1);
-                    pieces.splice(i, 0, firstPart);
-                    pieces.splice(i + 1, 0, secondPart);
-                }
-            }
-
-            return pieces;
-        };
-
-        var getArrayIndexerMatch = function (name) {
-            var arrayAccessRegex = /\[([^\]]+)\]/;
-
-            return arrayAccessRegex.exec(name);
-        };
-
         var getIndex = function (capture) {
             var intRegex = /^\d+$/;
 
