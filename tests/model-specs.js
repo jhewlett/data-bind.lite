@@ -109,7 +109,6 @@ describe('model', function() {
 
             expect(model.get('object.firstName')).toEqual('john');
             expect(valueChanged.calledWith('object.firstName')).toBeTruthy();
-            expect(valueChanged.calledWith('object')).toBeFalsy();
         });
     });
 
