@@ -121,8 +121,13 @@ var DataBind = (function (dataBind) {
                 if (lexer.currentToken().token === 'ID') {
                     id = lexer.currentToken().text;
 
-                    object = lookupFunc(id);
-                    lexer.consume();
+                    if (!object)
+                        object = lookupFunc(id);
+
+                    if (object === undefined) {
+                        object = {};
+                        updateValueFunc(id, object);
+                    }
 
                     if (!lexer.hasNextToken()) {
                         updateValueFunc(id, value);
@@ -134,33 +139,28 @@ var DataBind = (function (dataBind) {
                     changedCollections.push(id);
                     lexer.consume();
 
-                    var index = parseInt(lexer.currentToken().text);
+                    var index = getIndex(lexer.currentToken().text);
 
                     lexer.consume();    //RBRACK
 
-                    if (!lexer.hasNextToken()) {
+                    if (lexer.hasNextToken()) {
+                        object = object[index];
+                    } else {
                         object[index] = value;
 
                         fireValueChangedForAllDependencies(name);
                         fireValueChangedForAll(changedCollections);
-                    } else {
-                        object = object[index];
                     }
                 } else if (lexer.currentToken().token === 'DOT') {
                     lexer.consume();
 
-                    if (!lexer.hasNextToken()) {
-                        if (object) {
-                            object[lexer.currentToken().text] = value;
-                            fireValueChangedForAllDependencies(name);
-                            fireValueChangedForAll(changedCollections);
-                        } else {
-                            var newObject = {};
-                            newObject[lexer.currentToken().text] = value;
-                            updateValueFunc(id, newObject);
-                        }
-                    } else if (object) {
+                    if (lexer.hasNextToken()) {
+                        object[lexer.currentToken().text] = object[lexer.currentToken().text] || {};
                         object = object[lexer.currentToken().text];
+                    } else {
+                        object[lexer.currentToken().text] = value;
+                        fireValueChangedForAllDependencies(name);
+                        fireValueChangedForAll(changedCollections);
                     }
                 }
             }

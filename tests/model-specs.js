@@ -45,11 +45,11 @@ describe('model', function() {
         beforeEach(function() {
             model.attr('prop', 'dontTouchMe');
 
-            model.attr('item.prop', 'myValue');
+            model.attr('item.prop.prop2', 'myValue');
         });
 
         it('should create object and add to dictionary', function() {
-            expect(model.get('item.prop')).toEqual('myValue');
+            expect(model.get('item.prop.prop2')).toEqual('myValue');
         });
 
         it('should not use "prop" as key', function() {
@@ -118,14 +118,21 @@ describe('model', function() {
             valueChanged = sinon.spy();
             model.attr('object', {items: [{firstName: ''}]});
             model.addValueChangedListener(valueChanged);
+
+            model.attr('object.items[0].firstName', 'john');
         });
 
         it('should update property on object', function() {
-            model.attr('object.items[0].firstName', 'john');
-
             expect(model.get('object.items[0].firstName')).toEqual('john');
+        });
+
+        it('should call value changed for property', function() {
             expect(valueChanged.calledWith('object.items[0].firstName')).toBeTruthy();
         });
+
+//        it('should call value changed for collection', function() {
+//            expect(valueChanged.calledWith('object.items')).toBeTruthy();
+//        });
     });
 
     describe('calling attr with 2d array indexing', function() {
