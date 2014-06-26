@@ -41,6 +41,23 @@ describe('model', function() {
         });
     });
 
+    describe('calling attr with variable array index', function() {
+        var valueChanged;
+        beforeEach(function() {
+            valueChanged = sinon.spy();
+            model.attr('index', 1);
+            model.attr('items', [0, 1]);
+            model.addValueChangedListener(valueChanged);
+        });
+
+        it('should update value in array', function() {
+            model.attr('items[index]', 5);
+
+            expect(model.get('items[1]')).toEqual(5);
+            expect(valueChanged.calledWith('items[index]')).toBeTruthy();
+        });
+    });
+
     describe('calling attr with nonexistent object', function() {
         beforeEach(function() {
             model.attr('prop', 'dontTouchMe');

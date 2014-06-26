@@ -133,6 +133,8 @@ var DataBind = (function (dataBind) {
                         updateValueFunc(id, value);
                         fireValueChangedForAllDependencies(id);
                     }
+
+                    lexer.consume();
                 }
 
                 if (lexer.currentToken().token === 'LBRACK') {
