@@ -9,14 +9,6 @@ var DataBind = (function (dataBind) {
                 : object;
         };
 
-        var getIndex = function (capture) {
-            var intRegex = /^\d+$/;
-
-            return intRegex.test(capture)
-                ? parseInt(capture)
-                : lookupFunc(capture);
-        };
-
         var parseFunction = function(lexer, context) {
             var functionName = lexer.currentToken().text;
 
@@ -26,7 +18,7 @@ var DataBind = (function (dataBind) {
             if (lexer.currentToken().token === 'LPAREN') {
                 lexer.consume();
                 var argText = '';
-                while(lexer.hasNextToken() && lexer.currentToken().token !== 'RPAREN') {
+                while(lexer.currentToken().token !== 'RPAREN') {
                     if (lexer.currentToken().token === 'COMMA') {
                         args.push(get(argText));
                         argText = '';
@@ -36,7 +28,7 @@ var DataBind = (function (dataBind) {
                     lexer.consume();
                 }
 
-                if (lexer.currentToken().token === 'RPAREN' && argText) {
+                if (argText) {
                     args.push(get(argText));
                 }
             }
@@ -64,7 +56,7 @@ var DataBind = (function (dataBind) {
             } else if (lexer.currentToken().token === 'LBRACK') {
                 lexer.consume();
 
-                var index = getIndex(lexer.currentToken().text);
+                var index = get(lexer.currentToken().text);
 
                 return lookupFunc(id)[index];
             } else {
@@ -101,7 +93,7 @@ var DataBind = (function (dataBind) {
                 } else if (lexer.currentToken().token === 'LBRACK') {
                     lexer.consume();
 
-                    object = object[getIndex(lexer.currentToken().text)];
+                    object = object[get(lexer.currentToken().text)];
                 }
             }
 
@@ -141,7 +133,7 @@ var DataBind = (function (dataBind) {
                     changedCollections.push(id);
                     lexer.consume();
 
-                    var index = getIndex(lexer.currentToken().text);
+                    var index = get(lexer.currentToken().text);
 
                     lexer.consume();    //RBRACK
 
