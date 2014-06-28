@@ -9,29 +9,33 @@ var DataBind = (function (dataBind) {
                 : object;
         };
 
-        var parseFunction = function(lexer, context) {
-            var functionName = lexer.currentToken().text;
-
-            lexer.consume();
+        var getFunctionArgs = function(lexer) {
             var args = [];
 
             if (lexer.currentToken().token === 'LPAREN') {
                 lexer.consume();
-                var argText = '';
+
+                var argList = '';
                 while(lexer.currentToken().token !== 'RPAREN') {
-                    if (lexer.currentToken().token === 'COMMA') {
-                        args.push(get(argText));
-                        argText = '';
-                    } else {
-                        argText += lexer.currentToken().text;
-                    }
+                    argList += lexer.currentToken().text;
                     lexer.consume();
                 }
 
-                if (argText) {
-                    args.push(get(argText));
+                if (argList) {
+                    argList.split(',').forEach(function(argText) {
+                        args.push(get(argText));
+                    });
                 }
             }
+
+            return args;
+        };
+
+        var parseFunction = function(lexer, context) {
+            var functionName = lexer.currentToken().text;
+            lexer.consume();
+
+            var args = getFunctionArgs(lexer);
 
             return lookupFunc(functionName).apply(context, args);
         };
