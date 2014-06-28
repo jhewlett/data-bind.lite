@@ -1,7 +1,7 @@
 data-bind.lite
 ==============
 
-Lightweight data-binding library. Weighs in at just under 2kb minified and gzipped.
+Lightweight data-binding library. Weighs in at just under 3kb minified and gzipped.
 
 Declarative syntax:
 -------------------
