@@ -69,8 +69,7 @@ var DataBind = (function (dataBind) {
 
             var object = null;
 
-            while (lexer.hasNextToken()) {
-                lexer.consume();
+            do {
                 if (lexer.currentToken().token === 'NUMBER') {
                     return parseInt(lexer.currentToken().text);
                 }
@@ -95,7 +94,9 @@ var DataBind = (function (dataBind) {
 
                     object = object[get(lexer.currentToken().text)];
                 }
-            }
+
+                lexer.consume();
+            } while (lexer.hasNextToken());
 
             return checkWrapArray(name, object);
         };
@@ -106,9 +107,7 @@ var DataBind = (function (dataBind) {
 
             var lexer = new DataBind.Lexer(name);
 
-            while (lexer.hasNextToken()) {
-                lexer.consume();
-
+            do {
                 var id;
                 if (lexer.currentToken().token === 'ID') {
                     id = lexer.currentToken().text;
@@ -135,7 +134,7 @@ var DataBind = (function (dataBind) {
 
                     var index = get(lexer.currentToken().text);
 
-                    lexer.consume();    //RBRACK
+                    lexer.consume('RBRACK');
 
                     if (lexer.hasNextToken()) {
                         object = object[index];
@@ -157,7 +156,9 @@ var DataBind = (function (dataBind) {
                         fireValueChangedForAll(changedCollections);
                     }
                 }
-            }
+
+                lexer.consume();
+            } while (lexer.hasNextToken())
         };
 
         var fireValueChangedForAll = function (items) {

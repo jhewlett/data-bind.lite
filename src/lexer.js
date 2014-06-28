@@ -20,20 +20,31 @@ var DataBind = (function (dataBind) {
 
         var tokens = lexer.tokenize();
 
-        var i = -1;
+        var i = 0;
 
         var hasNextToken = function() {
             return i < tokens.length - 1;
         };
 
+        var currentToken = function() {
+            if (i < tokens.length)
+                return tokens[i];
+            else
+                return TokenJS.EndOfStream;
+        };
+
+        var consume = function(expected) {
+            i++;
+
+            if (expected && currentToken().token !== expected)
+                throw {
+                    toString: function() { return 'Syntax error: Expected token: ' + expected + ', actual: ' + currentToken().token }
+                };
+        };
+
         return {
-            currentToken: function() {
-                if (i < tokens.length)
-                    return tokens[i];
-                else
-                    return TokenJS.EndOfStream;
-            },
-            consume: function() { i++; },
+            currentToken: currentToken,
+            consume: consume,
             hasNextToken: hasNextToken
         };
     };

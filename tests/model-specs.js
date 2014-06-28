@@ -323,7 +323,7 @@ describe('model', function() {
             valueChanged = sinon.spy();
             model.addValueChangedListener(valueChanged);
 
-            model.attr('items[0].subItems[0].completed', true);
+            model.attr('items[0].subItems[0]["completed"]', true);
         });
 
         it('should set value', function() {
