@@ -11,7 +11,10 @@
         <br>
         <strong>Also known as:</strong>
         <ul data-foreach="alias in aliases">
-            <li data-bind="alias.title" data-class="alias.style"></li>
+            <li>
+                <span data-bind="alias.title" data-class="alias.style"></span>
+                <button data-click="removeItem(alias)">x</button>
+            </li>
         </ul>
 
         <input data-enter="addAlias()" type="text" data-bind="newAlias">

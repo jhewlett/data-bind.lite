@@ -19,6 +19,19 @@ var DataBind = (function (dataBind) {
             valueChangedCallback(name);
         };
 
+        var remove = function(item) {
+            var index = arr.indexOf(item);
+
+            if (index >= 0) {
+                arr.splice(index, 1);
+                valueChangedCallback(name);
+
+                return true;
+            }
+
+            return false;
+        };
+
         var clear = function() {
             arr.length = 0;
             valueChangedCallback(name);
@@ -27,6 +40,7 @@ var DataBind = (function (dataBind) {
         return {
             push: push,
             pop: pop,
+            remove: remove,
             value: arr,
             length: function() { return arr.length; },
             forEach: forEach,

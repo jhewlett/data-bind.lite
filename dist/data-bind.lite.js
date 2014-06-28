@@ -10,8 +10,6 @@ var DataBind = (function (dataBind) {
         model.addValueChangedListener(valueChangedHandler);
 
         function valueChangedHandler(name) {
-            console.log('value change: ', name);
-
             var foreachElements = scopeElement.querySelectorAll('[data-foreach$="in ' + name + '"]');
             bindForeach(foreachElements, name);
 
@@ -352,6 +350,19 @@ var DataBind = (function (dataBind) {
             valueChangedCallback(name);
         };
 
+        var remove = function(item) {
+            var index = arr.indexOf(item);
+
+            if (index >= 0) {
+                arr.splice(index, 1);
+                valueChangedCallback(name);
+
+                return true;
+            }
+
+            return false;
+        };
+
         var clear = function() {
             arr.length = 0;
             valueChangedCallback(name);
@@ -360,6 +371,7 @@ var DataBind = (function (dataBind) {
         return {
             push: push,
             pop: pop,
+            remove: remove,
             value: arr,
             length: function() { return arr.length; },
             forEach: forEach,
@@ -382,37 +394,33 @@ var DataBind = (function (dataBind) {
                 : object;
         };
 
-        var getIndex = function (capture) {
-            var intRegex = /^\d+$/;
-
-            return intRegex.test(capture)
-                ? parseInt(capture)
-                : lookupFunc(capture);
-        };
-
-        var parseFunction = function(lexer, context) {
-            var functionName = lexer.currentToken().text;
-
-            lexer.consume();
+        var getFunctionArgs = function(lexer) {
             var args = [];
 
             if (lexer.currentToken().token === 'LPAREN') {
                 lexer.consume();
-                var argText = '';
-                while(lexer.hasNextToken() && lexer.currentToken().token !== 'RPAREN') {
-                    if (lexer.currentToken().token === 'COMMA') {
-                        args.push(get(argText));
-                        argText = '';
-                    } else {
-                        argText += lexer.currentToken().text;
-                    }
+
+                var argList = '';
+                while(lexer.currentToken().token !== 'RPAREN') {
+                    argList += lexer.currentToken().text;
                     lexer.consume();
                 }
 
-                if (lexer.currentToken().token === 'RPAREN' && argText) {
-                    args.push(get(argText));
+                if (argList) {
+                    argList.split(',').forEach(function(argText) {
+                        args.push(get(argText));
+                    });
                 }
             }
+
+            return args;
+        };
+
+        var parseFunction = function(lexer, context) {
+            var functionName = lexer.currentToken().text;
+            lexer.consume();
+
+            var args = getFunctionArgs(lexer);
 
             return lookupFunc(functionName).apply(context, args);
         };
@@ -437,7 +445,7 @@ var DataBind = (function (dataBind) {
             } else if (lexer.currentToken().token === 'LBRACK') {
                 lexer.consume();
 
-                var index = getIndex(lexer.currentToken().text);
+                var index = get(lexer.currentToken().text);
 
                 return lookupFunc(id)[index];
             } else {
@@ -450,8 +458,7 @@ var DataBind = (function (dataBind) {
 
             var object = null;
 
-            while (lexer.hasNextToken()) {
-                lexer.consume();
+            do {
                 if (lexer.currentToken().token === 'NUMBER') {
                     return parseInt(lexer.currentToken().text);
                 }
@@ -474,9 +481,11 @@ var DataBind = (function (dataBind) {
                 } else if (lexer.currentToken().token === 'LBRACK') {
                     lexer.consume();
 
-                    object = object[getIndex(lexer.currentToken().text)];
+                    object = object[get(lexer.currentToken().text)];
                 }
-            }
+
+                lexer.consume();
+            } while (lexer.hasNextToken());
 
             return checkWrapArray(name, object);
         };
@@ -487,9 +496,7 @@ var DataBind = (function (dataBind) {
 
             var lexer = new DataBind.Lexer(name);
 
-            while (lexer.hasNextToken()) {
-                lexer.consume();
-
+            do {
                 var id;
                 if (lexer.currentToken().token === 'ID') {
                     id = lexer.currentToken().text;
@@ -514,11 +521,9 @@ var DataBind = (function (dataBind) {
                     changedCollections.push(id);
                     lexer.consume();
 
-                    var inBrackets = lexer.currentToken().text;
+                    var index = get(lexer.currentToken().text);
 
-                    var index = getIndex(inBrackets);
-
-                    lexer.consume();    //RBRACK
+                    lexer.consume('RBRACK');
 
                     if (lexer.hasNextToken()) {
                         object = object[index];
@@ -540,7 +545,9 @@ var DataBind = (function (dataBind) {
                         fireValueChangedForAll(changedCollections);
                     }
                 }
-            }
+
+                lexer.consume();
+            } while (lexer.hasNextToken())
         };
 
         var fireValueChangedForAll = function (items) {
@@ -580,20 +587,31 @@ var DataBind = (function (dataBind) {
 
         var tokens = lexer.tokenize();
 
-        var i = -1;
+        var i = 0;
 
         var hasNextToken = function() {
             return i < tokens.length - 1;
         };
 
+        var currentToken = function() {
+            if (i < tokens.length)
+                return tokens[i];
+            else
+                return TokenJS.EndOfStream;
+        };
+
+        var consume = function(expected) {
+            i++;
+
+            if (expected && currentToken().token !== expected)
+                throw {
+                    toString: function() { return 'Syntax error: Expected token: ' + expected + ', actual: ' + currentToken().token }
+                };
+        };
+
         return {
-            currentToken: function() {
-                if (i < tokens.length)
-                    return tokens[i];
-                else
-                    return TokenJS.EndOfStream;
-            },
-            consume: function() { i++; },
+            currentToken: currentToken,
+            consume: consume,
             hasNextToken: hasNextToken
         };
     };

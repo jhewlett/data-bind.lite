@@ -16,5 +16,9 @@ model.action('addAlias', function() {
     this.attr('newAlias', '');
 });
 
+model.action('removeItem', function(item) {
+    this.get('aliases').remove(item);
+});
+
 var binder = new DataBind.Binder(model);
 binder.bind();
