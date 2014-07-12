@@ -416,17 +416,17 @@ var DataBind = (function (dataBind) {
             return args;
         };
 
-        var parseFunction = function(lexer, context) {
+        var parseFunction = function(lexer) {
             var functionName = lexer.currentToken().text;
             lexer.consume();
 
             var args = getFunctionArgs(lexer);
 
-            return lookupFunc(functionName).apply(context, args);
+            return lookupFunc(functionName).apply(this, args);
         };
 
         var parseProperty = function(lexer, id, object) {
-            lexer.consume();
+            lexer.consume('ID');
 
             if (object) {
                 return object[lookupFunc(id)[lexer.currentToken().text]];
@@ -468,14 +468,14 @@ var DataBind = (function (dataBind) {
 
                 if (lexer.currentToken().token === 'ID') {
                     if (typeof lookupFunc(lexer.currentToken().text) === 'function') {
-                        object = parseFunction(lexer, this);
+                        object = parseFunction.call(this, lexer);
                     } else {
                         object = parseId(lexer, object);
                     }
                 }
 
                 if (lexer.currentToken().token === 'DOT') {
-                    lexer.consume();
+                    lexer.consume('ID');
 
                     object = object[lexer.currentToken().text];
                 } else if (lexer.currentToken().token === 'LBRACK') {
@@ -534,7 +534,7 @@ var DataBind = (function (dataBind) {
                         fireValueChangedForAll(changedCollections);
                     }
                 } else if (lexer.currentToken().token === 'DOT') {
-                    lexer.consume();
+                    lexer.consume('ID');
 
                     if (lexer.hasNextToken()) {
                         object[lexer.currentToken().text] = object[lexer.currentToken().text] || {};
