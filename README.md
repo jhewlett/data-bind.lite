@@ -1,7 +1,7 @@
 data-bind.lite
 ==============
 
-Lightweight data-binding library. Weighs in at just under 2kb minified and gzipped.
+Lightweight data-binding library. Weighs in at just under 3kb minified and gzipped.
 
 Declarative syntax:
 -------------------
@@ -89,8 +89,11 @@ Html:
   <strong>Full name:</strong> <span data-bind="fullName"></span>
   <br>
   <strong>Also known as:</strong>
-  <ul id="aliases" data-foreach="alias in aliases">
-    <li data-bind="alias.title" data-class="alias.style"></li>
+  <ul data-foreach="alias in aliases">
+    <li>
+      <span data-bind="alias.title" data-class="alias.style"></span>
+      <button data-click="removeItem(alias)">x</button>
+    </li>
   </ul>
 
   <input data-enter="addAlias()" type="text" data-bind="newAlias">
@@ -115,6 +118,10 @@ model.computed('fullName', function() {
 model.action('addAlias', function() {
   this.get('aliases').push({title: this.get('newAlias'), style: 'underline'});
   this.attr('newAlias', '');
+});
+
+model.action('removeItem', function(item) {
+    this.get('aliases').remove(item);
 });
 
 var binder = new DataBind.Binder(model);
